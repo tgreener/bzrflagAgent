@@ -69,19 +69,21 @@ public class AgentClientSocket {
 	}
 
 	public boolean confirmCommandResponse() {
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	public String getResponse() {
-		String line = "";
+		String response = "";
 		try {
-			line = input.readLine();
+			while(input.ready()) {
+				response += input.readLine();
+			}
 		}
 		catch(IOException e) {
 			System.out.println(e);
 		}
 		
-		return line;
+		return response;
 	}
 }
 
