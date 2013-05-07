@@ -3,21 +3,22 @@ package agent.net;
 
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.io.DataInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.IOException;
 
 public class AgentClientSocket {
 
 	Socket agentSocket;
-	DataInputStream input;
+	BufferedReader input;
 	PrintStream output;
 	
 
 	public AgentClientSocket(String machineName, int port) {
 		try {
 			agentSocket = new Socket(machineName, port);
-			input = new DataInputStream(agentSocket.getInputStream());
+			input = new BufferedReader(new InputStreamReader(agentSocket.getInputStream()));
 			output = new PrintStream(agentSocket.getOutputStream());
 		}
 		catch(UnknownHostException e) {
@@ -70,4 +71,18 @@ public class AgentClientSocket {
 	public boolean confirmCommandResponse() {
 		return false;
 	}
+
+	public String getResponse() {
+		String line = "";
+		try {
+			line = input.readLine();
+		}
+		catch(IOException e) {
+			System.out.println(e);
+		}
+		
+		return line;
+	}
 }
+
+
