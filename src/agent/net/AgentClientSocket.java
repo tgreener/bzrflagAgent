@@ -68,6 +68,42 @@ public class AgentClientSocket {
 		sendCommand("angvel " + agentNumber + " 0.0");
 	}
 
+	public void sendTeamsQuery() {
+		sendCommand("teams");
+	}
+
+	public void sendObstaclesQuery() {
+		sendCommand("obstacles");
+	}
+
+	public void sendBasesQuery() {
+		sendCommand("bases");
+	}
+
+	public void sendFlagsQuery() {
+		sendCommand("flags");
+	}
+
+	public void sendShotsQuery() {
+		sendCommand("shots");
+	}
+	
+	public void sendMyTanksQuery() {
+		sendCommand("mytanks");
+	}
+
+	public void sendOtherTanksQuery() {
+		sendCommand("othertanks");
+	}
+
+	public void sendConstantsQuery() {
+		sendCommand("constants");
+	}
+
+	public void sendOccGridQuery(int tankIndex) {
+		sendCommand("occgrid " + tankIndex);
+	}
+
 	public boolean confirmCommandResponse() {
 		throw new UnsupportedOperationException();
 	}
