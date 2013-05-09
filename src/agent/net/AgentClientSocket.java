@@ -3,6 +3,7 @@ package agent.net;
 
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.Semaphore;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -10,12 +11,14 @@ import java.io.IOException;
 
 public class AgentClientSocket {
 
+	private final Semaphore sem;
 	Socket agentSocket;
 	BufferedReader input;
 	PrintStream output;
 	
 
 	public AgentClientSocket(String machineName, int port) {
+		sem = new Semaphore(1);
 		try {
 			agentSocket = new Socket(machineName, port);
 			input = new BufferedReader(new InputStreamReader(agentSocket.getInputStream()));
@@ -45,6 +48,11 @@ public class AgentClientSocket {
 	}
 
 	public void sendCommand(String command) {
+		try {
+			sem.acquire();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		output.println(command);
 	}
 
@@ -132,6 +140,7 @@ public class AgentClientSocket {
 				response += line + "\n";
 				//System.out.println(line);
 			}while(!hasResponseEndToken(line));
+			sem.release();
 		}
 		catch(IOException e) {
 			System.out.println(e);
