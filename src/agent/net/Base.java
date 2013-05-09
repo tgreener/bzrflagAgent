@@ -15,4 +15,19 @@ public class Base {
 			corners[(i/2) - 2] = coords;
 		}
 	}
+
+	@Override
+	public String toString() {
+		String result = "\nbase " + color + "\n";
+		for(int i = 0; i < corners.length; i++) {
+			result += " " + corners[i][0] + ", ";
+			result += corners[i][1] + ";";
+			
+			if(i != corners.length - 1) {
+				result += "\n";
+			}
+		}
+
+		return result;
+	}
 }
