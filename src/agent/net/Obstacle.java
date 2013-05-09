@@ -30,5 +30,28 @@ public class Obstacle {
 
 		return result;
 	}
+
+	public double[][] getCorners() {
+		return corners;
+	}
+
+	public void setCorners(double[][] corners) {
+		this.corners = corners;
+	}
+	
+	public double[] getCenter(){
+		double x = 0;
+		double y = 0;
+		int total = 0;
+		for(double[] d : corners){
+			total++;
+			x += d[0];
+			y += d[1];
+		}
+		x = x/total;
+		y = y/total;
+		double coords[] = {x,y};
+		return coords;
+	}
 	
 }

@@ -29,5 +29,101 @@ public class Tank {
 		this.vy = Double.parseDouble(mytanksResponse[11]);
 		this.angvel = Double.parseDouble(mytanksResponse[12]);
 	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public String getCallsign() {
+		return callsign;
+	}
+
+	public void setCallsign(String callsign) {
+		this.callsign = callsign;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public int getShotsAvailable() {
+		return shotsAvailable;
+	}
+
+	public void setShotsAvailable(int shotsAvailable) {
+		this.shotsAvailable = shotsAvailable;
+	}
+
+	public double getTimeToTeload() {
+		return timeToTeload;
+	}
+
+	public void setTimeToTeload(double timeToTeload) {
+		this.timeToTeload = timeToTeload;
+	}
+
+	public String getFlag() {
+		return flag;
+	}
+
+	public void setFlag(String flag) {
+		this.flag = flag;
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public void setY(double y) {
+		this.y = y;
+	}
+
+	public double getAngle() {
+		return angle;
+	}
+
+	public void setAngle(double angle) {
+		this.angle = angle;
+	}
+
+	public double getVx() {
+		return vx;
+	}
+
+	public void setVx(double vx) {
+		this.vx = vx;
+	}
+
+	public double getVy() {
+		return vy;
+	}
+
+	public void setVy(double vy) {
+		this.vy = vy;
+	}
+
+	public double getAngvel() {
+		return angvel;
+	}
+
+	public void setAngvel(double angvel) {
+		this.angvel = angvel;
+	}
 	
 }
