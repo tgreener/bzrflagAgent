@@ -7,18 +7,18 @@ import java.util.ArrayList;
 
 public class ResponseParser {
 	
+	Scanner scan;
+
 	public ResponseParser() {
 	}
 	
-	public boolean checkAcknowledged(String response) {
-		Scanner scan = new Scanner(response);
-
+	private boolean checkAcknowledged() {
 		return scan.hasNext("ack");
 	}
 
 	public boolean checkOk(String response) {
-		Scanner scan = new Scanner(response);
-		if(checkAcknowledged(response)) {
+		scan = new Scanner(response);
+		if(checkAcknowledged()) {
 			scan.nextLine();
 		}
 
@@ -26,8 +26,12 @@ public class ResponseParser {
 	}
 
 	public List<Base> parseBases(String response) {
-		List<Base> bases = new ArrayList();
-		Scanner scan = new Scanner(response);
+		List<Base> bases = new ArrayList<Base>();
+		scan = new Scanner(response);
+
+		if(checkAcknowledged()) {
+			scan.nextLine();
+		}
 		
 		while(scan.hasNextLine()) {
 			String line = scan.nextLine();

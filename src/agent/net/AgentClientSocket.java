@@ -108,11 +108,28 @@ public class AgentClientSocket {
 		throw new UnsupportedOperationException();
 	}
 
+	public boolean responseReady() {
+		boolean result = false;
+
+		try {
+			result = input.ready();
+		}
+		catch(IOException e) {
+			System.out.println(e);
+		}
+
+		return result;
+	}
+
 	public String getResponse() {
 		String response = "";
+		
+		while(!responseReady()){}
+		
 		try {
 			while(input.ready()) {
-				response += input.readLine();
+				response += input.readLine() + "\n";
+				//System.out.println(response);
 			}
 		}
 		catch(IOException e) {
