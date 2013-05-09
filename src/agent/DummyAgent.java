@@ -10,15 +10,18 @@ public class DummyAgent {
 	
 	public static void main(String[] args) {
 		AgentClientSocket sock = new AgentClientSocket(args[0],Integer.parseInt(args[1]));
+		
 		sock.sendIntroduction();
 		int tank = 0;
+		Random r = new Random();
 		Timer timer = new Timer();
-		timer.schedule(new Shoot(sock,tank),1500);
-		timer.schedule(new MoveAndRotate(sock,tank,1),1000);
-		
+		timer.schedule(new Shoot(sock,tank,r),1500);
+		timer.schedule(new MoveAndRotate(sock,tank,1,r),1000);
+
+		r = new Random();
 		tank = 1;
-		timer.schedule(new Shoot(sock,tank),1500);
-		timer.schedule(new MoveAndRotate(sock,tank,1),1000);
+		timer.schedule(new Shoot(sock,tank,r),1500);
+		timer.schedule(new MoveAndRotate(sock,tank,1,r),1000);
 	}
 	
 	public static class Command extends TimerTask{
@@ -28,11 +31,11 @@ public class DummyAgent {
 		protected Timer timer;
 		protected Random r;
 				
-		public Command(AgentClientSocket socket, int tank){
+		public Command(AgentClientSocket socket, int tank, Random r){
 			this.socket = socket;
 			this.tank = tank;
 			timer = new Timer();
-			r = new Random();
+			this.r = r;
 		}
 		
 		public void run(){
@@ -48,8 +51,8 @@ public class DummyAgent {
 			socket.sendRotateCommand(this.tank,this.angle);
 		}
 		
-		public Rotate(AgentClientSocket socket,int tank, float angle){
-			super(socket,tank);
+		public Rotate(AgentClientSocket socket,int tank, float angle, Random r){
+			super(socket,tank, r);
 			this.angle = angle;
 		}
 	}	
@@ -66,14 +69,14 @@ public class DummyAgent {
 			if(this.speed == 0){
 				socket.sendRotateCommand(this.tank,1);
 				//Stop rotation after about 60 degrees
-				this.timer.schedule(new Rotate(this.socket,this.tank,0),(long)(8/4.5 * 1000)); 
+				this.timer.schedule(new Rotate(this.socket,this.tank,0, r),(long)(8/4.5 * 1000)); 
 			}
 			long moveTime = (long)(3000 +this.r.nextFloat()*5000);
-			this.timer.schedule(new MoveAndRotate(this.socket,this.tank,speed), moveTime);
+			this.timer.schedule(new MoveAndRotate(this.socket,this.tank,speed,this.r), moveTime);
 		}
 		
-		public MoveAndRotate(AgentClientSocket socket,int tank, int speed){
-			super(socket,tank);
+		public MoveAndRotate(AgentClientSocket socket,int tank, int speed, Random r){
+			super(socket,tank,r);
 			this.speed = speed;
 		}
 	}	
@@ -82,11 +85,11 @@ public class DummyAgent {
 		
 		public void run(){
 			socket.sendShootCommand(this.tank);
-			this.timer.schedule(new Shoot(this.socket,this.tank), (long)(1500 + this.r.nextFloat()*1000));
+			this.timer.schedule(new Shoot(this.socket,this.tank,r), (long)(1500 + this.r.nextFloat()*1000));
 		}
 		
-		public Shoot(AgentClientSocket socket, int tank){
-			super(socket,tank);
+		public Shoot(AgentClientSocket socket, int tank, Random r){
+			super(socket,tank,r);
 		}		
 	}
 }
