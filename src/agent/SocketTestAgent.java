@@ -11,7 +11,7 @@ import agent.net.Tank;
 import agent.net.Team;
 import java.util.List;
 
-public class Agent {
+public class SocketTestAgent {
 	
 	public static void main(String[] args) {
 		AgentClientSocket sock = new AgentClientSocket(args[0],Integer.parseInt(args[1]));
