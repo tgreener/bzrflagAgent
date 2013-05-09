@@ -25,4 +25,11 @@ public class Team {
 	public void setPlayerCount(int playerCount) {
 		this.playerCount = playerCount;
 	}
+
+	public String toString() {
+		String result = "\nTeam: ";
+		result += color + ", " + playerCount;
+
+		return result;
+	}
 }

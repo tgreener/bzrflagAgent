@@ -6,7 +6,7 @@ public class Tank {
 	String callsign;
 	String status; //isAlive
 	int shotsAvailable; //always 10?
-	double timeToTeload; //3 second reload time
+	double timeToReload; //3 second reload time
 	String flag; //dash if not flag
 	double x;
 	double y;
@@ -20,7 +20,7 @@ public class Tank {
 		this.callsign = mytanksResponse[2];
 		this.status = mytanksResponse[3];
 		this.shotsAvailable = Integer.parseInt(mytanksResponse[4]);
-		this.timeToTeload = Double.parseDouble(mytanksResponse[5]);
+		this.timeToReload = Double.parseDouble(mytanksResponse[5]);
 		this.flag = mytanksResponse[6];
 		this.x = Double.parseDouble(mytanksResponse[7]);
 		this.y = Double.parseDouble(mytanksResponse[8]);
@@ -62,12 +62,12 @@ public class Tank {
 		this.shotsAvailable = shotsAvailable;
 	}
 
-	public double getTimeToTeload() {
-		return timeToTeload;
+	public double getTimeToReload() {
+		return timeToReload;
 	}
 
-	public void setTimeToTeload(double timeToTeload) {
-		this.timeToTeload = timeToTeload;
+	public void setTimeToReload(double timeToReload) {
+		this.timeToReload = timeToReload;
 	}
 
 	public String getFlag() {
@@ -124,6 +124,20 @@ public class Tank {
 
 	public void setAngvel(double angvel) {
 		this.angvel = angvel;
+	}
+
+	public String toString() {
+		String result = "\nMyTank\n";
+		result += index + ", ";
+		result += callsign + ", ";
+		result += status + ", ";
+		result += shotsAvailable + ", ";
+		result += timeToReload + ", ";
+		result += flag + ", ";
+		result += x + ", " + y + ", " + angle + ", ";
+		result += vx + ", " + vy + ", " + angvel;
+
+		return result;
 	}
 	
 }

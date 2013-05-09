@@ -42,5 +42,12 @@ public class Shot {
 	public void setVy(double vy) {
 		this.vy = vy;
 	}
+
+	public String toString() {
+		String result = "\nshot\n";
+		result += x + ", " + y + ", " + vx + ", " + vy;
+
+		return result;
+	}
 	
 }

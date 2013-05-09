@@ -124,19 +124,24 @@ public class AgentClientSocket {
 	public String getResponse() {
 		String response = "";
 		
-		while(!responseReady()){}
-		
 		try {
-			while(input.ready()) {
-				response += input.readLine() + "\n";
-				//System.out.println(response);
-			}
+			String line;
+
+			do{
+				line = input.readLine();
+				response += line + "\n";
+				//System.out.println(line);
+			}while(!hasResponseEndToken(line));
 		}
 		catch(IOException e) {
 			System.out.println(e);
 		}
 		
 		return response;
+	}
+
+	private boolean hasResponseEndToken(String line) {
+		return line.contains("end") || line.contains("bzrobots") || line.contains("fail") || line.contains("ok");
 	}
 }
 
