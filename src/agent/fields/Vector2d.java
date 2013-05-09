@@ -60,11 +60,11 @@ public class Vector2d {
 	}	
 
 	public double lengthSquared() {
-		return Math.pow(x, 2) + Math.pow(y, 2)
+		return Math.pow(x, 2) + Math.pow(y, 2);
 	}
 
 	public double angle(Vector2d vec) {
-		return acos(dot(vec) / (vec.length() * length()));
+		return Math.acos(dot(vec) / (vec.length() * length()));
 	}
 }
 
