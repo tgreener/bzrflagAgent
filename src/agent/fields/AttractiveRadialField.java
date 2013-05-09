@@ -13,10 +13,6 @@ public class AttractiveRadialField extends RadialField{
 		super(a, r, s, x, y);
 	}
 
-	public Vector2d fieldAtPoint(Point2D p) {
-		return fieldAtPoint(p.getX(), p.getY());
-	} 
-
 	public Vector2d fieldAtPoint(double x, double y) {
 		double d = distanceToGoal(x, y);
 		double theta = getTheta(x, y);

@@ -25,12 +25,16 @@ public abstract class RadialField extends Field{
 		this.gy = y;
 	}
 
+	public double getMaxMagnitude() {
+		return spread * alpha;
+	}
+
 	protected double distanceToGoal(double x, double y) {
 		return (new Vector2d(x - this.gx, y - this.gy)).length();
 	}
 
 	protected double getTheta(double x, double y) {
-		return Math.atan((gy - y) / (gx - x));
+		return Math.atan2((gy - y), (gx - x));
 	}
 }
 

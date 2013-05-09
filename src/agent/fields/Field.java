@@ -12,7 +12,9 @@ public abstract class Field {
 	}
 
 	public abstract Vector2d fieldAtPoint(double x, double y);
-	public abstract Vector2d fieldAtPoint(Point2D p);
+	public Vector2d fieldAtPoint(Point2D p) {
+		return fieldAtPoint(p.getX(), p.getY());
+	} 
 	
 }
 
