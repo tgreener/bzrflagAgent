@@ -12,18 +12,20 @@ public class FieldListPrinter {
 
 	private int boardSize;
 	private List<Field> fields;
+	private int sample;
 
-	public FieldListPrinter(List<Field> fl, int bs) {
+	public FieldListPrinter(List<Field> fl, int bs, int) {
 		fields = fl;
 		boardSize = bs;
+		sample = s;
 	}
 
 	public void printFieldsFile(String fileName) {
-		double[][] data = new double[boardSize * boardSize][4];
+		double[][] data = new double[(boardSize / s) * (boardSize / s)][4];
 		int dataIndex = 0;
 
-		for(int i = 0; i < boardSize; i++) {
-			for(int j = 0; j < boardSize; j++) {
+		for(int i = 0; i < boardSize; i += s) {
+			for(int j = 0; j < boardSize; j += s) {
 				Vector2d fieldAtPoint = sumFieldAtPoint(j, i);
 				if(fieldAtPoint.length() > 1) {
 					fieldAtPoint = fieldAtPoint.normalize();
