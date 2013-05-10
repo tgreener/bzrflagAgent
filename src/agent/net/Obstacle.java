@@ -53,5 +53,10 @@ public class Obstacle {
 		double coords[] = {x,y};
 		return coords;
 	}
+	public double getRadius(){
+		double[] center = getCenter();
+		double radius = Math.sqrt(Math.pow((center[0] - corners[0][0]),2) + Math.pow((center[1]) - corners[0][1], 2));
+		return radius;
+	}
 	
 }
