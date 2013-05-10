@@ -25,8 +25,8 @@ public class RepulsiveRadialField extends RadialField {
 			dy = -alpha * (spread + radius - d) * sinTheta;
 		}
 		else if(d < radius){
-			dx = getMaxMagnitude() * cosTheta;
-			dy = getMaxMagnitude() * sinTheta;
+			dx = -getMaxMagnitude() * cosTheta;
+			dy = -getMaxMagnitude() * sinTheta;
 		}
 		
 		Vector2d result = new Vector2d(dx, dy);
