@@ -4,9 +4,10 @@ package agent;
 
 import java.util.List;
 import agent.fields.*;
+
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 import agent.net.*;
 
@@ -16,6 +17,8 @@ public class Agent {
 	ResponseParser rp;
 	AgentClientSocket socket;
 	double previousAngle;
+	List<Field> fields;
+
 	
 	public static void main(String[] args) {
 		AgentClientSocket sock = new AgentClientSocket(args[0],Integer.parseInt(args[1]));
@@ -58,12 +61,12 @@ public class Agent {
 		this.socket = socket;
 		socket.sendDriveCommand(tankNumber, 1);
 		socket.getResponse();
+		this.fields = new ArrayList<Field>();
+		createFields();
 	}
 	
 	public void moveToVector(Vector2d v){
-		socket.sendMyTanksQuery();
-		List<Tank> tanks = rp.parseMyTanks(socket.getResponse());
-		Tank tank = tanks.get(this.tankNumber);
+		Tank tank = getTank();
 		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy());
 		double angle = tankVector.angle(v);
 		float angvel = (float) ((angle + angle - previousAngle)/(Math.PI/2));
@@ -80,11 +83,38 @@ public class Agent {
 	}
 	
 	public Vector2d calculateVector(){
+		Tank tank = getTank();
 		
-		
-		Vector2d vector = new Vector2d(18d,18d);
-		
+		Vector2d vector = new Vector2d(0,0);
+		for(Field f : fields){
+			vector.add(f.fieldAtPoint(tank.getX(), tank.getY()));
+		}
 		return vector;
+	}
+	
+	public void createFields(){
+		socket.sendObstaclesQuery();
+		List<Obstacle> obstacles = rp.parseObstacles(socket.getResponse());
+		for(Obstacle obstacle : obstacles){
+			double[] center = obstacle.getCenter();
+			Field f = new RepulsiveRadialField(2d,obstacle.getRadius(),center[0],center[1]);
+			this.fields.add(f);
+		}
+		socket.sendBasesQuery();
+		List<Base> bases = rp.parseBases(socket.getResponse());
+		for(Base base : bases){
+			if(base.getColor().equals("blue")){
+				double[] center = base.getCenter();
+				Field f = new AttractiveRadialField(10.0d,base.getRadius(),center[0],center[1]);
+				this.fields.add(f);
+			}
+		}
+	}
+	public Tank getTank(){
+		socket.sendMyTanksQuery();
+		List<Tank> tanks = rp.parseMyTanks(socket.getResponse());
+		Tank tank = tanks.get(this.tankNumber);
+		return tank;
 	}
 }
 
