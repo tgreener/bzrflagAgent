@@ -34,8 +34,8 @@ public class FieldListPrinter {
 				data[dataIndex][0] = j;
 				data[dataIndex][1] = i;
 				
-				data[dataIndex][2] = fieldAtPoint.getX() * 10;
-				data[dataIndex][3] = fieldAtPoint.getY() * 10;
+				data[dataIndex][2] = fieldAtPoint.getX() * sample;
+				data[dataIndex][3] = fieldAtPoint.getY() * sample;
 
 				dataIndex++;
 			}
