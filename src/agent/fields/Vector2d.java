@@ -47,7 +47,8 @@ public class Vector2d {
 
 	public Vector2d normalize() {
 		double length = length();
-
+		if(length == 0)
+			return new Vector2d(0,0);
 		return new Vector2d(x / length, y / length);
 	}
 
@@ -65,6 +66,9 @@ public class Vector2d {
 
 	public double angle(Vector2d vec) {
 		return Math.acos(dot(vec) / (vec.length() * length()));
+	}
+	public double crossProduct(Vector2d vec){
+		return x*vec.getY() - y*vec.getX();
 	}
 }
 

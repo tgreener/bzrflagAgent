@@ -6,9 +6,9 @@ import java.util.List;
 import agent.fields.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import agent.net.*;
 
 public class Agent {
@@ -18,6 +18,9 @@ public class Agent {
 	AgentClientSocket socket;
 	double previousAngle;
 	List<Field> fields;
+	String opponentColor;
+	String targetBase;
+	String myColor;
 
 	
 	public static void main(String[] args) {
@@ -25,17 +28,11 @@ public class Agent {
 		sock.getResponse();
 		sock.sendIntroduction();
 		
-		Agent a = new Agent(2,sock);
-		
-		/* Obstacle field: tangential = Repellent + current direction
-		 *  - base on corners and points inbetween corners
-		 * Base field : strong attractive towards center of corners
-		 * 
-		 * 
-		 */
+		Agent a = new Agent(0,sock,"blue","red");
+
 		a.moveToVector(a.calculateVector());
 		Timer timer = new Timer();
-		timer.schedule(new UpdateVector(a),100);
+		timer.scheduleAtFixedRate(new UpdateVector(a),100,100);
 		
 	}
 	public static class UpdateVector extends TimerTask{
@@ -48,13 +45,11 @@ public class Agent {
 		}
 		
 		public void run(){
-			Timer timer = new Timer();
-			timer.schedule(new UpdateVector(agent),100);
 			agent.moveToVector(agent.calculateVector());
 		}
 	}
 	
-	public Agent(int tankNumber, AgentClientSocket socket){
+	public Agent(int tankNumber, AgentClientSocket socket, String opponentColor, String myColor){
 		this.tankNumber = tankNumber;
 		rp = new ResponseParser();
 		previousAngle = 0;
@@ -62,59 +57,94 @@ public class Agent {
 		socket.sendDriveCommand(tankNumber, 1);
 		socket.getResponse();
 		this.fields = new ArrayList<Field>();
-		createFields();
+		targetBase = opponentColor;
+		this.opponentColor = opponentColor;
+		this.myColor = myColor;
+		createFields(targetBase);
 	}
 	
 	public void moveToVector(Vector2d v){
 		Tank tank = getTank();
-		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy());
+		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy()).normalize();
 		double angle = tankVector.angle(v);
-		float angvel = (float) ((angle + angle - previousAngle)/(Math.PI/2));
+		float angvel = (float) ((angle + angle - previousAngle)/(Math.PI));
+
+		if(tankVector.crossProduct(v) < 0){
+			angvel = angvel * -1;
+		}
 		previousAngle = angle;
 		if(angvel > .0001 || angvel < -.0001){
 			socket.sendRotateCommand(tankNumber, angvel);
 			socket.getResponse();
 		}
-		if(tank.getTimeToReload() == 0){
+		if(tank.getTimeToReload() <= 0){
 			socket.sendShootCommand(tankNumber);
 			socket.getResponse();
 		}
+		if(tank.getFlag().equals(this.opponentColor))
+			this.targetBase = this.myColor;
+		else
+			this.targetBase = this.opponentColor;
+		if(this.getDistanceToGoal() < 50){
+			socket.sendDriveCommand(this.tankNumber, .1f);
+			socket.getResponse();
+		}
+		else{
+			socket.sendDriveCommand(this.tankNumber, 1f);
+			socket.getResponse();
+		}
+		
+		createFields(this.targetBase);
 		System.out.println("angle:" + angle + " angvel " + angvel);
 	}
 	
 	public Vector2d calculateVector(){
 		Tank tank = getTank();
-		
-		Vector2d vector = new Vector2d(0,0);
+		Random r = new Random((long)tank.getTimeToReload()*10000);
+		Vector2d vector = new Vector2d(r.nextDouble()*2-1,r.nextDouble()*2-1);
 		for(Field f : fields){
-			vector.add(f.fieldAtPoint(tank.getX(), tank.getY()));
+			vector = vector.add(f.fieldAtPoint(tank.getX(), tank.getY()).normalize());
 		}
-		return vector;
+		return vector.normalize();
 	}
 	
-	public void createFields(){
+	public void createFields(String targetBase){
+		fields = new ArrayList<Field>();
 		socket.sendObstaclesQuery();
 		List<Obstacle> obstacles = rp.parseObstacles(socket.getResponse());
 		for(Obstacle obstacle : obstacles){
 			double[] center = obstacle.getCenter();
-			Field f = new RepulsiveRadialField(2d,obstacle.getRadius(),center[0],center[1]);
+			Field f = new RepulsiveRadialField(.1,.1,100d,center[0],center[1]);
 			this.fields.add(f);
 		}
-		socket.sendBasesQuery();
-		List<Base> bases = rp.parseBases(socket.getResponse());
-		for(Base base : bases){
-			if(base.getColor().equals("blue")){
-				double[] center = base.getCenter();
-				Field f = new AttractiveRadialField(10.0d,base.getRadius(),center[0],center[1]);
-				this.fields.add(f);
-			}
-		}
+		Base base = getTargetBase();
+		double[] center = base.getCenter();
+		Field f = new AttractiveRadialField(50,base.getRadius(),800d,center[0],center[1]);
+		this.fields.add(f);
 	}
 	public Tank getTank(){
 		socket.sendMyTanksQuery();
 		List<Tank> tanks = rp.parseMyTanks(socket.getResponse());
 		Tank tank = tanks.get(this.tankNumber);
 		return tank;
+	}
+	
+	public Base getTargetBase(){
+		Base b = null;
+		socket.sendBasesQuery();
+		List<Base> bases = rp.parseBases(socket.getResponse());
+		for(Base base : bases){
+			if(base.getColor().equals(targetBase)){
+				b = base;
+			}
+		}
+		return b;
+	}
+	public double getDistanceToGoal(){
+		Base b = getTargetBase();
+		double[] c = b.getCenter();
+		Tank t = getTank();
+		return Math.sqrt(Math.pow(c[0] - t.getX(), 2) + Math.pow(c[1] - t.getY(), 2));
 	}
 }
 
