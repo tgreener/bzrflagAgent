@@ -143,7 +143,7 @@ public class ResponseParser {
 
 	public Occgrid parseOccgrid(String response) {
 		ArrayList<String> grid = new ArrayList<String>();
-		Point at;
+		Point at = null;
 		int[] dimension = new int[2];
 		scan = new Scanner(response);
 
@@ -163,8 +163,8 @@ public class ResponseParser {
 			}
 			else if(line.contains("size")) {
 				String[] splitDim = line.split("\\s|x");
-				int dimension[0] = Integer.parseInt(splitDim[1]);
-				int dimension[1] = Integer.parseInt(splitDim[2]);
+				dimension[0] = Integer.parseInt(splitDim[1]);
+				dimension[1] = Integer.parseInt(splitDim[2]);
 			}
 			else if(!line.contains("begin") && !line.contains("end")) {
 				grid.add(line);
