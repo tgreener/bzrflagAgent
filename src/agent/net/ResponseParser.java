@@ -4,6 +4,8 @@ package agent.net;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
+import state.Occgrid;
+import java.awt.Point;
 
 public class ResponseParser {
 	
@@ -137,6 +139,41 @@ public class ResponseParser {
 		}
 		
 		return teams;
+	}
+
+	public Occgrid parseOccgrid(String response) {
+		ArrayList<String> grid = new ArrayList<String>();
+		Point at;
+		int[] dimension = new int[2];
+		scan = new Scanner(response);
+
+		if(checkAcknowledged()) {
+			scan.nextLine();
+		}
+
+		while(scan.hasNextLine()) {
+			String line = scan.nextLine();
+			
+			if(line.contains("at")) {
+				String[] splitAt = line.split("\\s|,");
+				int pointX = Integer.parseInt(splitAt[1]);
+				int pointY = Integer.parseInt(splitAt[2]);
+
+				at = new Point(pointX, pointY);
+			}
+			else if(line.contains("size")) {
+				String[] splitDim = line.split("\\s|x");
+				int dimension[0] = Integer.parseInt(splitDim[1]);
+				int dimension[1] = Integer.parseInt(splitDim[2]);
+			}
+			else if(!line.contains("begin") && !line.contains("end")) {
+				grid.add(line);
+			}
+		}
+
+		Occgrid occ = new Occgrid(grid, at, dimension);
+		
+		return occ;
 	}
 }
 

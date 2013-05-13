@@ -26,7 +26,7 @@ public class FieldListPrinter {
 
 		for(int i = 0; i < boardSize; i += sample) {
 			for(int j = 0; j < boardSize; j += sample) {
-				Vector2d fieldAtPoint = sumFieldAtPoint(j-400, i-400);
+				Vector2d fieldAtPoint = sumFieldAtPoint(j, i);
 				if(fieldAtPoint.length() > 1) {
 					fieldAtPoint = fieldAtPoint.normalize();
 				}
@@ -34,8 +34,8 @@ public class FieldListPrinter {
 				data[dataIndex][0] = j;
 				data[dataIndex][1] = i;
 				
-				data[dataIndex][2] = fieldAtPoint.getX()*sample;
-				data[dataIndex][3] = fieldAtPoint.getY()*sample;
+				data[dataIndex][2] = fieldAtPoint.getX() * sample;
+				data[dataIndex][3] = fieldAtPoint.getY() * sample;
 
 				dataIndex++;
 			}
