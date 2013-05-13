@@ -14,10 +14,10 @@ public class Occgrid {
 		int[][] grid = new int[response.size()][response.get(0).length()];
 		int i = 0;
 		for(String s : response){
-			String[] split = s.split("");
-			int j = 0;
-			for(String sub : split){
-				grid[i][j++] = Integer.parseInt(sub);
+			System.out.println("STRING:" + s);
+			String[] split = s.split("(?!^)");
+			for(int j = 0; j < split.length; j++){
+				grid[i][j] = Integer.parseInt(split[j]);
 			}
 			i++;
 		}
