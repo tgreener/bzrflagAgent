@@ -6,10 +6,10 @@ import java.awt.Point;
 
 public abstract class Search {
 	
-	private Occgrid grid;
+	private SearchSpace space;
 
-	public Search(Occgrid grid){
-		this.grid = grid;
+	public Search(SearchSpace s){
+		space = s;
 	}
 
 	public abstract Path search(Point start);
