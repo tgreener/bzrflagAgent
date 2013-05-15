@@ -5,6 +5,8 @@ import state.Occgrid;
 import agent.net.Tank;
 
 public class SearchSpace {
+
+	private static final int TRANSFORM = 400;
 	
 	private SearchSpaceLocation[][] grid;
 	private boolean penalize;
@@ -64,11 +66,11 @@ public class SearchSpace {
 	}
 
 	private int transform(double c) {
-		return (int)Math.round(c) + 400;
+		return (int)Math.round(c) + TRANSFORM;
 	}
 
 	private int transform(int c) {
-		return c + 400;
+		return c + TRANSFORM;
 	}
 
 	/*public String toString() {
