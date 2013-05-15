@@ -43,6 +43,26 @@ public class SearchSpace {
 		grid[(int)Math.round(x)][(int)Math.round(y)].makeGoal();
 	}
 
+	public int getOccValue(int x, int y) {
+		return grid[x][y].getOccValue();
+	}
+
+	public boolean isGoal(int x, int y) {
+		return grid[x][y].isGoal();
+	}
+
+	public boolean hasTank(int x, int y) {
+		return grid[x][y].hasTank();
+	}
+
+	public boolean hasPenalty(int x, int y) {
+		return grid[x][y].hasPenalty();
+	}
+
+	public SearchSpaceLocation getLocation(int x, int y) {
+		return grid[x][y];
+	}
+
 	/*public String toString() {
 		String result;
 
