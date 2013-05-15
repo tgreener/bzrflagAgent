@@ -41,6 +41,10 @@ public class SearchSpace {
 		}
 	}
 
+	public void visit(int x, int y) {
+		grid[transform(x)][transform(y)].visit();
+	}
+
 	public void setGoal(double x, double y) {
 		grid[transform(x)][transform(y)].makeGoal();
 	}
