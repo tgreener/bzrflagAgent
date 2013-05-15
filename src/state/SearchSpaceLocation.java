@@ -7,12 +7,14 @@ public class SearchSpaceLocation {
 	private boolean isGoal;
 	private boolean hasTank;
 	private boolean hasPenalty;
+	private boolean visited;
 
 	public SearchSpaceLocation(int ov, boolean g, boolean t, boolean p) {
 		occValue = ov;
 		isGoal = g;
 		hasTank = t;
 		hasPenalty = p;
+		visited = false;
 	}
 
 	public SearchSpaceLocation(int ov) {
@@ -20,6 +22,7 @@ public class SearchSpaceLocation {
 		isGoal = false;
 		hasTank = false;
 		hasPenalty = false;
+		visited = false;
 	}
 
 	public SearchSpaceLocation() {
@@ -27,6 +30,7 @@ public class SearchSpaceLocation {
 		isGoal = false;
 		hasTank = false;
 		hasPenalty = false;
+		visited = false;
 	}
 
 	public void setOccValue(int ov) {
@@ -45,6 +49,10 @@ public class SearchSpaceLocation {
 		hasPenalty = true;
 	}
 
+	public void visit() {
+		visited = true;
+	}
+
 	public int getOccValue() {
 		return occValue;
 	}
@@ -55,6 +63,10 @@ public class SearchSpaceLocation {
 
 	public boolean hasTank() {
 		return hasTank;
+	}
+
+	public boolean visited() {
+		return visited;
 	}
 
 	public boolean hasPenalty() {

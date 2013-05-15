@@ -61,6 +61,10 @@ public class SearchSpace {
 		return grid[transform(x)][transform(y)].hasPenalty();
 	}
 
+	public boolean visited(int x, int y) {
+		return grid[transform(x)][transform(y)].visited();
+	}
+
 	public SearchSpaceLocation getLocation(int x, int y) {
 		return grid[transform(x)][transform(y)];
 	}
