@@ -25,8 +25,8 @@ public class SearchSpace {
 	}
 
 	public void addTank(double x, double y) {
-		int gridX = (int)Math.round(x);
-		int gridY = (int)Math.round(y);
+		int gridX = transform(x);
+		int gridY = transform(y);
 
 		grid[gridX][gridY].putTank();
 
@@ -40,27 +40,35 @@ public class SearchSpace {
 	}
 
 	public void setGoal(double x, double y) {
-		grid[(int)Math.round(x)][(int)Math.round(y)].makeGoal();
+		grid[transform(x)][transform(y)].makeGoal();
 	}
 
 	public int getOccValue(int x, int y) {
-		return grid[x][y].getOccValue();
+		return grid[transform(x)][transform(y)].getOccValue();
 	}
 
 	public boolean isGoal(int x, int y) {
-		return grid[x][y].isGoal();
+		return grid[transform(x)][transform(y)].isGoal();
 	}
 
 	public boolean hasTank(int x, int y) {
-		return grid[x][y].hasTank();
+		return grid[transform(x)][transform(y)].hasTank();
 	}
 
 	public boolean hasPenalty(int x, int y) {
-		return grid[x][y].hasPenalty();
+		return grid[transform(x)][transform(y)].hasPenalty();
 	}
 
 	public SearchSpaceLocation getLocation(int x, int y) {
-		return grid[x][y];
+		return grid[transform(x)][transform(y)];
+	}
+
+	private int transform(double c) {
+		return (int)Math.round(c) + 400;
+	}
+
+	private int transform(int c) {
+		return c + 400;
 	}
 
 	/*public String toString() {
