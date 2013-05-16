@@ -36,7 +36,9 @@ public class SearchSpace {
 		if(penalize) {
 			for(int i = -1; i <= 1; i++) {
 				for(int j = -1; j <= 1; j++) {
-					grid[gridX + i][gridY + j].penalize();
+					if(inBounds(gridX + i, gridY +j)) {
+						grid[gridX + i][gridY + j].penalize();
+					}
 				}
 			}
 		}
