@@ -41,9 +41,15 @@ public class SearchAgent {
 		socket.sendMyTanksQuery();
 		List<Tank> tanks = rp.parseMyTanks(socket.getResponse());
 		Tank myTank = tanks.get(0);
+		socket.sendFlagsQuery();
+		List<Flag> flags = rp.parseFlags(socket.getResponse());
+		for(Flag flag : flags){
+			if(flag.getFlagColor().equals("green")){
+				searchSpace.setGoal(flag.getX(), flag.getY());
+			}
+		}
 		UniformCostSearch ucs = new UniformCostSearch(searchSpace);
-//		List<Flag> flags = rp.parse
-		return ucs.getPath((int)myTank.getX()+199,(int)myTank.getY()+199);
+		return ucs.getPath((int)myTank.getX()+200,(int)myTank.getY()+200);
 	}
 	
 }

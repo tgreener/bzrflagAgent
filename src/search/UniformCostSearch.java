@@ -38,9 +38,9 @@ public class UniformCostSearch {
 	public LinkedList<SearchSpaceLocation> expandNode(TraverseNode node){
 		if(node == null)
 			return null; // failure, queue is empty
-		if(node.isGoal())
+		if(node.isGoal()){
 			return node.getPath();
-		
+		}
 		int nodeX = node.getX();
 		int nodeY = node.getY();
 		visitedNodes.add(node);
@@ -50,15 +50,15 @@ public class UniformCostSearch {
 			offer(traverseGrid[nodeX+1][nodeY+1],node);
 		if(nodeX +1 < traverseGrid.length)
 			offer(traverseGrid[nodeX+1][nodeY],node);
-		if(nodeX +1 < traverseGrid.length && nodeY -1 > 0)
+		if(nodeX +1 < traverseGrid.length && nodeY -1 >= 0)
 			offer(traverseGrid[nodeX+1][nodeY-1],node);
-		if(nodeY -1 > 0)
+		if(nodeY -1 >= 0)
 			offer(traverseGrid[nodeX][nodeY-1],node);
-		if(nodeX - 1 > 0 && nodeY - 1 > 0)
+		if(nodeX - 1 >= 0 && nodeY - 1 >= 0)
 			offer(traverseGrid[nodeX-1][nodeY-1],node);
-		if(nodeX - 1 > 0)
+		if(nodeX - 1 >= 0)
 			offer(traverseGrid[nodeX-1][nodeY],node);
-		if(nodeX -1 > 0  && nodeY +1 < traverseGrid.length)
+		if(nodeX -1 >= 0  && nodeY +1 < traverseGrid.length)
 			offer(traverseGrid[nodeX-1][nodeY+1],node);
 		return expandNode(queue.poll());
 	}
