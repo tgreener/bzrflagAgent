@@ -12,7 +12,7 @@ public class Path {
 
 	public Path() {
 		path = new LinkedList<Step>();
-		length = 0d;
+		pathCost = 0d;
 	}
 
 	public void addStep(Step step) {
@@ -30,6 +30,18 @@ public class Path {
 
 	public Iterator<Step> iterator() {
 		return path.iterator();
+	}
+	
+	public String toString() {
+		String result = "Path Cost: " + pathCost;
+		Iterator<Step> i = iterator();
+		
+		while(i.hasNext()) {
+			result += "\n";
+			result += i.next().toString();
+		}
+
+		return result;
 	}
 }
 

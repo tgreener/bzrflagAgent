@@ -32,5 +32,12 @@ public class Step {
 	public Point getEndPoint() {
 		return endPoint;
 	}
+
+	public String toString() {
+		String result = "Start: " + startPoint + ", ";
+		result += "End: " + endPoint + ", Cost: " + cost;
+
+		return result;
+	}
 }
 
