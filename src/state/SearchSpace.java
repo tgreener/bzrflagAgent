@@ -6,7 +6,7 @@ import agent.net.Tank;
 
 public class SearchSpace {
 
-	private static final int TRANSFORM = 400;
+	private static final int TRANSFORM = 200;
 	
 	private SearchSpaceLocation[][] grid;
 	private boolean penalize;
