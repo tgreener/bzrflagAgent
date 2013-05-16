@@ -3,11 +3,12 @@ package state;
 
 import state.Occgrid;
 import agent.net.Tank;
+import java.awt.Point;
 
 public class SearchSpace {
 
 	private static final int TRANSFORM = 200;
-	
+
 	private SearchSpaceLocation[][] grid;
 	private boolean penalize;
 	
@@ -74,11 +75,20 @@ public class SearchSpace {
 	}
 
 	private int transform(double c) {
-		return (int)Math.round(c) + TRANSFORM;
+		return transform((int)Math.round(c));
 	}
 
 	private int transform(int c) {
 		return c + TRANSFORM;
+	}
+
+	private boolean inBounds(int x, int y) {
+		return x >= -200 && x <= 200 &&
+		       y >= -200 && y <= 200;
+	}
+
+	private boolean inBounds(Point p) {
+		return inBounds(p.x, p.y);
 	}
 
 	/*public String toString() {
