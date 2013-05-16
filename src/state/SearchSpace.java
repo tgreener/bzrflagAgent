@@ -76,21 +76,21 @@ public class SearchSpace {
 		return grid[transform(x)][transform(y)];
 	}
 
+	public boolean inBounds(int x, int y) {
+		return x >= -200 && x <= 200 &&
+		       y >= -200 && y <= 200;
+	}
+
+	public boolean inBounds(Point p) {
+		return inBounds(p.x, p.y);
+	}
+
 	private int transform(double c) {
 		return transform((int)Math.round(c));
 	}
 
 	private int transform(int c) {
 		return c + TRANSFORM;
-	}
-
-	private boolean inBounds(int x, int y) {
-		return x >= -200 && x <= 200 &&
-		       y >= -200 && y <= 200;
-	}
-
-	private boolean inBounds(Point p) {
-		return inBounds(p.x, p.y);
 	}
 
 	/*public String toString() {
