@@ -21,6 +21,12 @@ public class Step {
 		this.cost = cost;
 	}
 
+	public Step(Step s) {
+		startPoint = s.getStartPoint();
+		endPoint = s.getEndPoint();
+		cost = s.getCost();		
+	}
+
 	public double getCost() {
 		return cost;
 	}

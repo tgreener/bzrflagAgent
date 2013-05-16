@@ -15,9 +15,20 @@ public class Path {
 		pathCost = 0d;
 	}
 
+	public Path(Path p) {
+		Iterator<Step> 
+	}
+
 	public void addStep(Step step) {
 		path.add(step);
 		pathCost += step.getCost();
+	}
+
+	public Step popStep() {
+		Step popper = (LinkedList<Step>)path.removeLast();
+		pathCost -= popper.getCost();
+
+		return popper;
 	}
 
 	public double getCost() {
