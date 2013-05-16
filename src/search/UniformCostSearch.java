@@ -11,50 +11,76 @@ import java.util.PriorityQueue;
 public class UniformCostSearch {
 	
 	private SearchSpace grid;
-	private PriorityQueue<SearchSpaceLocation> queue;
-	private HashSet<SearchSpaceLocation> visitedNodes;
-	private SearchSpaceLocation goal;
+	private TraverseNode[][] traverseGrid;
+	private PriorityQueue<TraverseNode> queue;
+	private HashSet<TraverseNode> visitedNodes;
+	private TraverseNode goal;
 	
-	public UniformCostSearch(SearchSpace grid, SearchSpaceLocation start, 
-			SearchSpaceLocation goal){
+	public UniformCostSearch(SearchSpace grid){
 		this.grid = grid;
-		Comparator<SearchSpaceLocation> comparer = new NodeCompare();
-		queue = new PriorityQueue<SearchSpaceLocation>(1000,comparer);
-		visitedNodes = new HashSet<SearchSpaceLocation>();
-		this.goal = goal;
-		visitedNodes.add(start);
-		expandNode(start);
-		
+		buildTraverseGrid(grid);
 	}
-	public void expandNode(SearchSpaceLocation node){
-		if(node.isGoal())
-			return;
+	
+	private void buildTraverseGrid(SearchSpace searchSpace){
+		traverseGrid = new TraverseNode[200][200];
+		for(int x = 0; x < 200; x++){
+			for(int y = 0; y < 200; y++){
+				traverseGrid[x][y] = new TraverseNode(x,y,grid.getLocation(x, y));
+				if(grid.isGoal(x, y)){
+					System.out.println("GOAL:x:" + x + " Y: " + y);
+					goal = traverseGrid[x][y];
+				}
+			}
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	public LinkedList<SearchSpaceLocation> expandNode(TraverseNode node){
 		if(node == null)
-			return;
+			return null; // failure, queue is empty
+		if(node.isGoal())
+			return node.getPath();
+		
 		int nodeX = node.getX();
 		int nodeY = node.getY();
 		visitedNodes.add(node);
-		offer(grid.getLocation(nodeX, nodeY+1));
-		offer(grid.getLocation(nodeX+1, nodeY+1));
-		offer(grid.getLocation(nodeX+1, nodeY));
-		offer(grid.getLocation(nodeX+1, nodeY-1));
-		offer(grid.getLocation(nodeX, nodeY-1));
-		offer(grid.getLocation(nodeX-1, nodeY-1));
-		offer(grid.getLocation(nodeX-1, nodeY));
-		offer(grid.getLocation(nodeX-1, nodeY+1));
-		expandNode(queue.poll());
+		if(nodeY +1 < traverseGrid[nodeX].length)
+			offer(traverseGrid[nodeX][nodeY+1],node);
+		if(nodeX +1 < traverseGrid.length && nodeY +1 < traverseGrid.length)
+			offer(traverseGrid[nodeX+1][nodeY+1],node);
+		if(nodeX +1 < traverseGrid.length)
+			offer(traverseGrid[nodeX+1][nodeY],node);
+		if(nodeX +1 < traverseGrid.length && nodeY -1 > 0)
+			offer(traverseGrid[nodeX+1][nodeY-1],node);
+		if(nodeY -1 > 0)
+			offer(traverseGrid[nodeX][nodeY-1],node);
+		if(nodeX - 1 > 0 && nodeY - 1 > 0)
+			offer(traverseGrid[nodeX-1][nodeY-1],node);
+		if(nodeX - 1 > 0)
+			offer(traverseGrid[nodeX-1][nodeY],node);
+		if(nodeX -1 > 0  && nodeY +1 < traverseGrid.length)
+			offer(traverseGrid[nodeX-1][nodeY+1],node);
+		return expandNode(queue.poll());
 	}
-	public void offer(SearchSpaceLocation node){
-		if(!queue.contains(node) && !visitedNodes.contains(node)){
+	
+	public void offer(TraverseNode node, TraverseNode fromNode){
+		if(!queue.contains(node) && !visitedNodes.contains(node)
+				&& node.getLocation().getOccValue() == 0){
+			updateNode(node,fromNode);
 			queue.offer(node);
 		}
 	}
 	
-	public class NodeCompare implements Comparator<SearchSpaceLocation>{
+	private void updateNode(TraverseNode node, TraverseNode fromNode){
+		node.update(fromNode);
+	}
+	
+	public class NodeCompare implements Comparator<TraverseNode>{
 
 		@Override
-		public int compare(SearchSpaceLocation node1, SearchSpaceLocation node2) {
-			return distanceToGoal(node1) > distanceToGoal(node2) ? 1 : -1;
+		public int compare(TraverseNode node1, TraverseNode node2) {
+			return node1.getPathLength() + distanceToGoal(node1)
+					> node2.getPathLength() + distanceToGoal(node2) ? 1 : -1;
 		}
 	}
 	
@@ -62,20 +88,66 @@ public class UniformCostSearch {
 		private SearchSpaceLocation location;
 		private LinkedList<SearchSpaceLocation> path;
 		private double pathLength;
+		int x,y;
 		
-		public TraverseNode(SearchSpaceLocation node, LinkedList<SearchSpaceLocation> path,
-				double pathLength){
+		public TraverseNode(int x, int y,SearchSpaceLocation node){
 			this.location = node;
-			this.path = path;
-			this.path.add(node);
-			this.pathLength = pathLength;
-			this.pathLength += distanceToGoal(node);
+			this.path = new LinkedList<SearchSpaceLocation>();
+			this.pathLength = 0;
+			this.x = x;
+			this.y = y;
 		}
 		
+		public double getPathLength(){
+			return pathLength;
+		}
+		public int getX(){
+			return x;
+		}
+		public int getY(){
+			return y;
+		}
+		public boolean isGoal(){
+			return location.isGoal();
+		}
+		public void update(TraverseNode node){
+			this.path = new LinkedList<SearchSpaceLocation>(node.getPath());
+			this.pathLength = node.pathLength;
+			path.add(location);
+			pathLength += distanceToNodePenalty(node);
+		}
+		public LinkedList<SearchSpaceLocation> getPath(){
+			return path;
+		}
+		public double distanceToNode(TraverseNode node){
+			return Math.sqrt(Math.pow(x-node.x,2) + Math.pow(y-node.y, 2));
+		}
+		public double distanceToNodePenalty(TraverseNode node){
+			double penalty = 1;
+			if(location.hasPenalty() && node.getLocation().hasPenalty())
+				penalty = 1.5;
+			else if(location.hasPenalty())
+				penalty = 1.1;
+			else if (node.getLocation().hasPenalty())
+				penalty = 1.3;
+			return Math.sqrt(Math.pow(x-node.x,2) + Math.pow(y-node.y, 2)) * penalty;
+		}
+		public SearchSpaceLocation getLocation(){
+			return location;
+		}
 	}
 
-	public double distanceToGoal(SearchSpaceLocation node){
-		double d = 0;
+	public double distanceToGoal(TraverseNode node){
+		double d = node.distanceToNode(goal);
 		return d;
+	}
+
+	public LinkedList<SearchSpaceLocation> getPath(int startX,int startY) {
+		Comparator<TraverseNode> comparer = new NodeCompare();
+		queue = new PriorityQueue<TraverseNode>(100000,comparer);
+		visitedNodes = new HashSet<TraverseNode>();
+		visitedNodes.add(traverseGrid[startX][startY]);
+		System.out.println("START");
+		return expandNode(traverseGrid[startX][startY]);
 	}
 }
