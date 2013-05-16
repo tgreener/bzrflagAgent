@@ -22,7 +22,7 @@ public class Path {
 		Iterator<Step> i = p.iterator();
 		
 		while(i.hasNext()) {
-			addStep(i.next());
+			addStep(new Step(i.next()));
 		}
 	}
 
