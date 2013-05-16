@@ -48,7 +48,7 @@ public class SearchSpace {
 		grid[transform(x)][transform(y)].visit();
 	}
 
-	public void unvisit() {
+	public void unvisit(int x, int y) {
 		grid[transform(x)][transform(y)].unvisit();
 	}
 

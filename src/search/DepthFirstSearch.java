@@ -3,6 +3,7 @@ package search;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Iterator;
 import java.awt.Point;
 import state.SearchSpace;
 
@@ -26,20 +27,25 @@ public class DepthFirstSearch extends Search {
 
 	private void traverse(Point sp) {
 		visit(sp);
+
+		if(space.isGoal(sp.x, sp.y)) return;
 		
 		List<Step> steps = expandChildren(sp);
 		Iterator<Step> itr = steps.iterator();
 
 		while(itr.hasNext()) {
-			
+			Step s = itr.next();
+			traversing.addStep(s);
+			traverse(s.getEndPoint());
+			traversing.popStep();
 		}
 
-		leave(sp)
+		leave(sp);
 	}
 
 	public void visit(Point p) {
 		space.visit(p.x, p.y);
-		if(space.isGoal(sp.x, sp.y)) {
+		if(space.isGoal(p.x, p.y)) {
 			if(best == null || best.getCost() > traversing.getCost()) {
 				best = new Path(traversing);
 			}
