@@ -48,6 +48,10 @@ public class SearchSpace {
 		grid[transform(x)][transform(y)].visit();
 	}
 
+	public void unvisit(int x, int y) {
+		grid[transform(x)][transform(y)].unvisit();
+	}
+
 	public void setGoal(double x, double y) {
 		grid[transform(x)][transform(y)].makeGoal();
 	}

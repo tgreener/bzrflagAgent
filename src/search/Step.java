@@ -15,10 +15,10 @@ public class Step {
 		this.cost = sp.distance(ep);
 	}
 
-	public Step(Point sp, Point ep, double cost) {
+	public Step(Point sp, Point ep, double penalty) {
 		startPoint = sp;
 		endPoint = ep;
-		this.cost = cost;
+		this.cost = sp.distance(ep) * penalty;
 	}
 
 	public Step(Step s) {
