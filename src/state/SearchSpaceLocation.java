@@ -53,6 +53,10 @@ public class SearchSpaceLocation {
 		visited = true;
 	}
 
+	public void unvisit() {
+		visited = false;
+	}
+
 	public int getOccValue() {
 		return occValue;
 	}
