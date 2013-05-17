@@ -27,7 +27,6 @@ public class SearchAgent {
 		//search.getUCSPath();
 		
 		Path p = search.dfs();
-		System.out.println(p);
 		p.printToFile("dfs.dat");
 	}
 	
