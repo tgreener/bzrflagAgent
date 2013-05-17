@@ -46,8 +46,8 @@ public class Step {
 	}
 
 	public String toString() {
-		String result = "Start: " + startPoint + ", ";
-		result += "End: " + endPoint + ", Cost: " + cost;
+		String result = "Start: (" + startPoint.x + ", " + startPoint.y + "), ";
+		result += "End: (" + endPoint.x + ", " + endPoint.y + "), Cost: " + cost;
 
 		return result;
 	}

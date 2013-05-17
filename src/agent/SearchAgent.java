@@ -2,9 +2,10 @@ package agent;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.awt.Point;
 
 import agent.net.*;
-import search.UniformCostSearch;
+import search.*;
 import state.*;
 
 public class SearchAgent {
@@ -12,6 +13,10 @@ public class SearchAgent {
 	Occgrid grid;
 	SearchSpace searchSpace;
 	AgentClientSocket socket;
+	Point tankStart;
+	List<Tank> tanks;
+	Tank myTank;
+	List<Flag> flags;
 	
 	public static void main(String[] args) {
 		AgentClientSocket sock = new AgentClientSocket(args[0],Integer.parseInt(args[1]));
@@ -19,8 +24,11 @@ public class SearchAgent {
 		sock.sendIntroduction();
 		sock.sendOccGridQuery(0);
 		SearchAgent search = new SearchAgent(sock);
-		search.getUCSPath();
+		//search.getUCSPath();
 		
+		Path p = search.dfs();
+		System.out.println(p);
+		p.printToFile("dfs.dat");
 	}
 	
 	public SearchAgent(AgentClientSocket socket) {
@@ -33,23 +41,35 @@ public class SearchAgent {
 		for(OtherTank tank : tanks){
 			searchSpace.addTank(tank.getX(), tank.getY());
 		}
+
+		parse();
 		
+		tankStart = new Point((int)myTank.getX()+199,(int)myTank.getY()+199);
 	}
-	
-	public LinkedList<SearchSpaceLocation> getUCSPath(){
+
+	private void parse() {
 		ResponseParser rp = new ResponseParser();
 		socket.sendMyTanksQuery();
-		List<Tank> tanks = rp.parseMyTanks(socket.getResponse());
-		Tank myTank = tanks.get(0);
+		tanks = rp.parseMyTanks(socket.getResponse());
+		myTank = tanks.get(0);
 		socket.sendFlagsQuery();
-		List<Flag> flags = rp.parseFlags(socket.getResponse());
+		flags = rp.parseFlags(socket.getResponse());
 		for(Flag flag : flags){
 			if(flag.getFlagColor().equals("green")){
 				searchSpace.setGoal(flag.getX(), flag.getY());
 			}
 		}
+	}
+	
+	public LinkedList<SearchSpaceLocation> getUCSPath(){
 		UniformCostSearch ucs = new UniformCostSearch(searchSpace);
 		return ucs.getPath((int)myTank.getX()+200,(int)myTank.getY()+200);
+	}
+
+	private Path dfs() {
+		DepthFirstSearch dfs = new DepthFirstSearch(searchSpace);
+		
+		return dfs.search(tankStart);
 	}
 	
 }

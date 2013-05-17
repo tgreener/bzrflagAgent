@@ -26,7 +26,7 @@ public class DepthFirstSearch extends Search {
 	}
 
 	private void traverse(Point sp) {
-		if(space.getOccValue(sp.x, sp.y) == 0)
+		if(space.getOccValue(sp.x, sp.y) == 0) {
 			visit(sp);
 
 			if(space.isGoal(sp.x, sp.y)) return;
@@ -37,15 +37,16 @@ public class DepthFirstSearch extends Search {
 			while(itr.hasNext()) {
 				Step s = itr.next();
 				traversing.addStep(s);
+				//System.out.println(s);
 				traverse(s.getEndPoint());
 				traversing.popStep();
 			}
 	
-			leave(sp);
+			//leave(sp);
 		}
 	}
 
-	public void visit(Point p) {
+	private void visit(Point p) {
 		space.visit(p.x, p.y);
 		if(space.isGoal(p.x, p.y)) {
 			if(best == null || best.getCost() > traversing.getCost()) {
@@ -54,7 +55,7 @@ public class DepthFirstSearch extends Search {
 		}
 	}
 
-	public void leave(Point p) {
+	private void leave(Point p) {
 		space.unvisit(p.x, p.y);
 	}
 
@@ -92,7 +93,7 @@ public class DepthFirstSearch extends Search {
 	}
 
 	private boolean canVisit(int x, int y) {
-		return space.inBounds(x, y) && space.visited(x ,y)
+		return space.inBounds(x, y) && !space.visited(x ,y) && space.getOccValue(x, y) == 0;
 	}
 
 	private Step createStep(int sx, int sy, int ex, int ey) {

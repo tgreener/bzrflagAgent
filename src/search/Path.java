@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+
 public class Path {
 	
 	private List<Step> path;
@@ -60,6 +64,25 @@ public class Path {
 		}
 
 		return result;
+	}
+
+	public void printToFile(String fileName) {
+		try {
+			PrintWriter p = new PrintWriter(fileName, "UTF-8");
+			
+			for(Step s : path) {
+				p.print(s.getStartPoint().x + " " + s.getStartPoint().y + " ");
+				p.print(s.getEndPoint().x + " " + s.getEndPoint().y + "\n");
+			}
+
+			p.close();
+		}
+		catch(FileNotFoundException e) {
+			System.out.println(e);
+		}
+		catch(UnsupportedEncodingException e) {
+			System.out.println(e);
+		}
 	}
 }
 
