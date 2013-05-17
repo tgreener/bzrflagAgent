@@ -105,7 +105,9 @@ public class AgentClientSocket {
 	}
 
 	public void sendConstantsQuery() {
+		System.out.println("constants");
 		sendCommand("constants");
+		System.out.println("end");
 	}
 
 	public void sendOccGridQuery(int tankIndex) {
