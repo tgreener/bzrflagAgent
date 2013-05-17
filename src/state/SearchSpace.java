@@ -82,8 +82,8 @@ public class SearchSpace {
 	}
 
 	public boolean inBounds(int x, int y) {
-		return x >= -200 && x <= 200 &&
-		       y >= -200 && y <= 200;
+		return x > -200 && x < 200 &&
+		       y > -200 && y < 200;
 	}
 
 	public boolean inBounds(Point p) {

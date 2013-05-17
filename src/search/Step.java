@@ -10,7 +10,7 @@ public class Step {
 	private Point endPoint;
 
 	public Step(Point ep) {
-		startPoint = null;
+		startPoint = ep;
 		endPoint = ep;
 		this.cost = 0;
 	}

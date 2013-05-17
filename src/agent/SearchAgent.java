@@ -31,10 +31,13 @@ public class SearchAgent {
 		sock.sendIntroduction();
 		sock.sendOccGridQuery(0);
 		SearchAgent search = new SearchAgent(sock);
-		search.getUCSPath();
-		search.getAStarPath();
-		Path p = search.dfs();
-		p.printToFile("dfs.dat");
+		//search.getUCSPath();
+		//search.getAStarPath();
+		
+		Path p = search.bfs();
+		p.printToFile("bfs.dat", 10);
+		//Path d = search.dfs();
+		//d.printToFile("dfsNodes.dat", 10);
 	}
 	
 	public SearchAgent(AgentClientSocket socket) {
@@ -51,10 +54,9 @@ public class SearchAgent {
 		}
 
 		parse();
-		System.out.println("MYX: " + myTank.getX() + " Y: " + myTank.getY());
+		//System.out.println("MYX: " + myTank.getX() + " Y: " + myTank.getY());
 		
-		tankStart = new Point((int)myTank.getX()+(int)constants.getWorldsize() / 2 -1,
-				(int)myTank.getY()+(int)constants.getWorldsize() / 2 - 1);
+		tankStart = new Point((int)myTank.getX(),(int)myTank.getY());
 	}
 
 	private void parse() {
@@ -80,6 +82,12 @@ public class SearchAgent {
 		DepthFirstSearch dfs = new DepthFirstSearch(searchSpace);
 		
 		return dfs.search(tankStart);
+	}
+
+	private Path bfs() {
+		BreadthFirstSearch bfs = new BreadthFirstSearch(searchSpace, "bfsNodes.dat");
+		
+		return bfs.search(tankStart);
 	}
 	
 }

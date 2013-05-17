@@ -6,16 +6,37 @@ import state.SearchSpace;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 
 public class BreadthFirstSearch extends Search {
 	
 	Path best;
 	LinkedList<Node> frontier;
+	PrintWriter p;
 
-	public BreadthFirstSearch(SearchSpace space) {
+	public BreadthFirstSearch(SearchSpace space, String filename) {
 		super(space);
-		best = new Path();
+		best = null;
 		frontier = new LinkedList<Node>();
+		
+		try {
+			p = new PrintWriter(filename, "UTF-8");
+		}
+		catch(FileNotFoundException e) {
+			System.out.println(e);
+		}
+		catch(UnsupportedEncodingException e) {
+			System.out.println(e);
+		}
+		p.println("set title \"" + filename +"\"");
+		p.println("set xrange [-200.0: 200.0]");
+		p.println("set yrange [-200.0: 200.0]");
+		p.println("unset key");
+		p.println("set size square");	
+
+		
 	}
 
 	@Override
@@ -32,7 +53,8 @@ public class BreadthFirstSearch extends Search {
 
 			while(frontier.size() > 0) {
 				Node n = frontier.pop();
-
+				printNodeToFile(n);
+				
 				Point position = n.step.getEndPoint();
 				if(space.isGoal(position.x, position.y))
 					generatePath(n);
@@ -53,17 +75,21 @@ public class BreadthFirstSearch extends Search {
 		Path newPath = new Path();
 		Node current = n;
 		LinkedList<Step> temp = new LinkedList<Step>();
+		//System.out.println("Goal! " + n.step);
 		
 		while(current.parent != null) {
 			temp.add(current.step);
+			//System.out.println(current.step + " " + temp.size());
 			current = current.parent;
 		}
 
 		while(temp.size() > 0) {
-			newPath.addStep(temp.pop());
+			Step addThis = temp.removeLast();
+			//System.out.println(addThis + " " + temp.size());
+			newPath.addStep(addThis);
 		}
 
-		if(best.getCost() > newPath.getCost()) {
+		if(best == null || best.getCost() > newPath.getCost()) {
 			best = newPath;
 		}
 	}
@@ -101,8 +127,20 @@ public class BreadthFirstSearch extends Search {
 		return children;
 	}
 
+	private void printNodeToFile(Node n) {
+		Step s = n.step;
+
+		p.print("set arrow from ");
+
+		p.print(s.getStartPoint().getX() + ", " + s.getStartPoint().getY() + " to ");
+		p.print(s.getEndPoint().getX() + ", " + s.getEndPoint().getY() + " nohead lt 2\n");
+
+		p.println("plot \'-\' with lines");
+		p.println("0 0 0 0\ne\n");
+	}
+
 	private boolean canVisit(int x, int y) {
-		return space.inBounds(x, y) && space.visited(x ,y);
+		return space.inBounds(x, y) && !space.visited(x ,y) && space.getOccValue(x, y) == 0;
 	}
 
 	private Step createStep(int sx, int sy, int ex, int ey) {

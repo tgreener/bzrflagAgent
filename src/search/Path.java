@@ -66,13 +66,60 @@ public class Path {
 		return result;
 	}
 
-	public void printToFile(String fileName) {
+	public void printToFile(String fileName, int counter) {
 		try {
 			PrintWriter p = new PrintWriter(fileName, "UTF-8");
-			
+			int pauseCounter = 0;
+
+			p.println("set title \"" + fileName +"\"");
+			p.println("set xrange [-200.0: 200.0]");
+			p.println("set yrange [-200.0: 200.0]");
+			p.println("unset key");
+			p.println("set size square");		
+
 			for(Step s : path) {
-				p.print(s.getStartPoint().x + " " + s.getStartPoint().y + " ");
-				p.print(s.getEndPoint().x + " " + s.getEndPoint().y + "\n");
+				p.print("set arrow from ");
+				double dx = s.getEndPoint().getX() - s.getStartPoint().getX();
+				double dy = s.getEndPoint().getY() - s.getStartPoint().getY();
+
+				p.print(s.getStartPoint().getX() + ", " + s.getStartPoint().getY() + " to ");
+				p.print(s.getEndPoint().getX() + ", " + s.getEndPoint().getY() + " nohead lt 2\n");
+
+				p.println("plot \'-\' with lines");
+				p.println("0 0 0 0\ne\n");
+
+				if(pauseCounter <= counter) {
+					//p.println("pause 1");
+					pauseCounter = 0;
+				}
+	
+				pauseCounter++;
+			}
+
+			p.close();
+		}
+		catch(FileNotFoundException e) {
+			System.out.println(e);
+		}
+		catch(UnsupportedEncodingException e) {
+			System.out.println(e);
+		}
+	}
+
+	public void printToVectorFile(String fileName) {
+		try {
+			PrintWriter p = new PrintWriter(fileName, "UTF-8");
+				
+
+			for(Step s : path) {
+				p.print("set arrow from ");
+				double dx = s.getEndPoint().getX() - s.getStartPoint().getX();
+				double dy = s.getEndPoint().getY() - s.getStartPoint().getY();
+
+				p.print(s.getStartPoint().getX() + ", " + s.getStartPoint().getY() + " ");
+				p.print(dx + ", " + dy + "\n");
+
+				
 			}
 
 			p.close();
