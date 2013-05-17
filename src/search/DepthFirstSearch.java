@@ -26,21 +26,23 @@ public class DepthFirstSearch extends Search {
 	}
 
 	private void traverse(Point sp) {
-		visit(sp);
+		if(space.getOccValue(sp.x, sp.y) == 0)
+			visit(sp);
 
-		if(space.isGoal(sp.x, sp.y)) return;
-		
-		List<Step> steps = expandChildren(sp);
-		Iterator<Step> itr = steps.iterator();
+			if(space.isGoal(sp.x, sp.y)) return;
+			
+			List<Step> steps = expandChildren(sp);
+			Iterator<Step> itr = steps.iterator();
 
-		while(itr.hasNext()) {
-			Step s = itr.next();
-			traversing.addStep(s);
-			traverse(s.getEndPoint());
-			traversing.popStep();
+			while(itr.hasNext()) {
+				Step s = itr.next();
+				traversing.addStep(s);
+				traverse(s.getEndPoint());
+				traversing.popStep();
+			}
+	
+			leave(sp);
 		}
-
-		leave(sp);
 	}
 
 	public void visit(Point p) {
@@ -61,32 +63,36 @@ public class DepthFirstSearch extends Search {
 		int x = parent.x;
 		int y = parent.y;
 	
-		if(space.inBounds(x - 1, y)) {
+		if(canVisit(x - 1, y)) {
 			children.add(createStep(x, y, x - 1, y));
 		}
-		if(space.inBounds(x + 1, y)) {
+		if(canVisit(x + 1, y)) {
 			children.add(createStep(x, y, x + 1, y));
 		}
-		if(space.inBounds(x, y + 1)) {
+		if(canVisit(x, y + 1)) {
 			children.add(createStep(x, y, x, y + 1));
 		}
-		if(space.inBounds(x, y - 1)) {
+		if(canVisit(x, y - 1)) {
 			children.add(createStep(x, y, x, y - 1));
 		}
-		if(space.inBounds(x - 1, y + 1)) {
+		if(canVisit(x - 1, y + 1)) {
 			children.add(createStep(x, y, x - 1, y + 1));
 		}
-		if(space.inBounds(x + 1, y + 1)) {
+		if(canVisit(x + 1, y + 1)) {
 			children.add(createStep(x, y, x + 1, y + 1));
 		}
-		if(space.inBounds(x - 1, y - 1)) {
+		if(canVisit(x - 1, y - 1)) {
 			children.add(createStep(x, y, x - 1, y - 1));
 		}
-		if(space.inBounds(x + 1, y - 1)) {
+		if(canVisit(x + 1, y - 1)) {
 			children.add(createStep(x, y, x + 1, y - 1));
 		}
 
 		return children;
+	}
+
+	private boolean canVisit(int x, int y) {
+		return space.inBounds(x, y) && space.visited(x ,y)
 	}
 
 	private Step createStep(int sx, int sy, int ex, int ey) {
