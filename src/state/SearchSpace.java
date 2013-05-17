@@ -7,12 +7,13 @@ import java.awt.Point;
 
 public class SearchSpace {
 
-	private static final int TRANSFORM = 200;
+	private int TRANSFORM;
 
 	private SearchSpaceLocation[][] grid;
 	private boolean penalize;
 	
-	public SearchSpace(Occgrid g, boolean p) {
+	public SearchSpace(Occgrid g, boolean p, int worldSize) {
+		TRANSFORM = worldSize / 2;
 		grid = new SearchSpaceLocation[g.getDimension()[0]][g.getDimension()[1]];
 		penalize = p;
 
@@ -69,7 +70,7 @@ public class SearchSpace {
 	}
 
 	public boolean hasPenalty(int x, int y) {
-		return penalize && grid[transform(x)][transform(y)].hasPenalty();
+		return grid[transform(x)][transform(y)].hasPenalty();
 	}
 
 	public boolean visited(int x, int y) {
@@ -81,8 +82,8 @@ public class SearchSpace {
 	}
 
 	public boolean inBounds(int x, int y) {
-		return x > -200 && x < 200 &&
-		       y > -200 && y < 200;
+		return x >= -200 && x <= 200 &&
+		       y >= -200 && y <= 200;
 	}
 
 	public boolean inBounds(Point p) {

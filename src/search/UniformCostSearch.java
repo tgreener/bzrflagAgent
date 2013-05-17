@@ -39,6 +39,7 @@ public class UniformCostSearch {
 		if(node == null)
 			return null; // failure, queue is empty
 		if(node.isGoal()){
+			System.out.println("GPL: " + node.getPathLength());
 			return node.getPath();
 		}
 		int nodeX = node.getX();
@@ -79,8 +80,7 @@ public class UniformCostSearch {
 
 		@Override
 		public int compare(TraverseNode node1, TraverseNode node2) {
-			return node1.getPathLength() + distanceToGoal(node1)
-					> node2.getPathLength() + distanceToGoal(node2) ? 1 : -1;
+			return node1.getPathLength() > node2.getPathLength() ? 1 : -1;
 		}
 	}
 	

@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import state.Occgrid;
 import java.awt.Point;
 
-import agent.net.Flag;
-
 public class ResponseParser {
 	
 	Scanner scan;
@@ -177,6 +175,7 @@ public class ResponseParser {
 		
 		return occ;
 	}
+
 	public List<Flag> parseFlags(String response) {
 		List<Flag> teams = new ArrayList<Flag>();
 		scan = new Scanner(response);
@@ -194,6 +193,22 @@ public class ResponseParser {
 		}
 		
 		return teams;
+	}
+	
+	public Constants parseConstants(String response){
+		scan = new Scanner(response);
+
+		if(checkAcknowledged()) {
+			scan.nextLine();
+		}
+		String[][] strResponse = new String[20][3];
+		int i = 0;
+		while(scan.hasNextLine()) {
+			String line = scan.nextLine();
+			strResponse[i++] = line.split(" ");
+		}
+		Constants consts = new Constants(strResponse);
+		return consts;
 	}
 }
 
