@@ -15,8 +15,10 @@ public class BreadthFirstSearch extends Search {
 	Path best;
 	LinkedList<Node> frontier;
 	PrintWriter p;
+	int granularity;
+	int counter;
 
-	public BreadthFirstSearch(SearchSpace space, String filename) {
+	public BreadthFirstSearch(SearchSpace space, String filename, int g) {
 		super(space);
 		best = null;
 		frontier = new LinkedList<Node>();
@@ -36,12 +38,14 @@ public class BreadthFirstSearch extends Search {
 		p.println("unset key");
 		p.println("set size square");	
 
-		
+		granularity = g;
+		counter = 0;
 	}
 
 	@Override
 	public Path search(Point start) {
 		traverse(start);
+		p.close();
 			
 		return best;
 	}
@@ -128,15 +132,21 @@ public class BreadthFirstSearch extends Search {
 	}
 
 	private void printNodeToFile(Node n) {
-		Step s = n.step;
+		if(granularity < counter) {
+			counter = 0;		
+			Step s = n.step;
 
-		p.print("set arrow from ");
+			p.print("set arrow from ");
 
-		p.print(s.getStartPoint().getX() + ", " + s.getStartPoint().getY() + " to ");
-		p.print(s.getEndPoint().getX() + ", " + s.getEndPoint().getY() + " nohead lt 2\n");
+			p.print(s.getStartPoint().getX() + ", " + s.getStartPoint().getY() + " to ");
+			p.print(s.getEndPoint().getX() + ", " + s.getEndPoint().getY() + " nohead lt 2\n");
 
-		p.println("plot \'-\' with lines");
-		p.println("0 0 0 0\ne\n");
+			p.println("plot \'-\' with lines");
+			p.println("0 0 0 0\ne\n");
+		}
+		else {
+			counter++;
+		}
 	}
 
 	private boolean canVisit(int x, int y) {

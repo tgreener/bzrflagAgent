@@ -3,45 +3,102 @@ package search;
 
 import java.awt.Point;
 import state.SearchSpace;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Iterator;
+
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 
 public class IDDFS extends Search {
 	
-	Path best;
+	Path nodes;
 	Path traversing;
 	long depth;
 	boolean goal;
+	PrintWriter p;
+	int counter;
+	int granularity;
 
 	public IDDFS(SearchSpace space) {
 		super(space);
 		traversing = new Path();
-		best = null;
-		dept = 0;
+		nodes = new Path();
+		depth = 0;
 		goal = false;
+
+		try {
+			p = new PrintWriter("iddfsNodes.dat", "UTF-8");
+		}
+		catch(FileNotFoundException e) {
+			System.out.println(e);
+		}
+		catch(UnsupportedEncodingException e) {
+			System.out.println(e);
+		}
+		p.println("set title \"iddfsNodes.dat\"");
+		p.println("set xrange [-190.0: -170.0]");
+		p.println("set yrange [-10.0: 10.0]");
+		p.println("unset key");
+		p.println("set size square");
+
+		granularity = 0;
+		counter = 0;			
+	}
+
+	private void printStepToFile(Step s) {
+		if(granularity == counter) {
+			counter = 0;		
+
+			p.print("set arrow from ");
+
+			p.print(s.getStartPoint().getX() + ", " + s.getStartPoint().getY() + " to ");
+			p.print(s.getEndPoint().getX() + ", " + s.getEndPoint().getY() + " nohead lt 2\n");
+
+			p.println("plot \'-\' with lines");
+			p.println("0 0 0 0\ne");
+			p.println("pause 0.2");
+			p.flush();
+		}
+		else {
+			counter++;
+		}
 	}
 
 	@Override
 	public Path search(Point start) {
-		while(!goal) {
+		while(!this.goal && depth < 6) {
+			System.out.println("Depth: " + depth);
 			traverse(start, 0);
+			space.reset();
 			depth++;
+			
 		}
 		
-		return best;
+		return traversing;
+	}
+
+	public void printNodes(int granularity) {
+		nodes.printToFile("iddfsNodes.dat", granularity);
 	}
 
 	private boolean traverse(Point sp, long d) {
-		if(space.getOccValue(sp.x, sp.y) == 0) {
+		if(space.getOccValue(sp.x, sp.y) == 0 && d < depth) {
 			visit(sp);
 
-			if(space.isGoal(sp.x, sp.y) || d > depth) return true;
+			if(space.isGoal(sp.x, sp.y) ) return true;
 			
 			List<Step> steps = expandChildren(sp);
 			Iterator<Step> itr = steps.iterator();
 
 			while(itr.hasNext()) {
 				Step s = itr.next();
+				//System.out.println(s + " " + d + ", " + depth);
 				traversing.addStep(s);
-				if(traverse(s.getEndPoint()), d+1) return true;
+				printStepToFile(s);
+				nodes.addStep(s);
+				if(traverse(s.getEndPoint(), d+1)) return true;
 				traversing.popStep();
 			}
 	
@@ -54,9 +111,7 @@ public class IDDFS extends Search {
 	private void visit(Point p) {
 		space.visit(p.x, p.y);
 		if(space.isGoal(p.x, p.y)) {
-			if(best == null || best.getCost() > traversing.getCost()) {
-				best = new Path(traversing);
-			}
+			this.goal = true;
 		}
 	}
 

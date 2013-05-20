@@ -57,6 +57,14 @@ public class SearchSpace {
 		grid[transform(x)][transform(y)].makeGoal();
 	}
 
+	public void reset() {
+		for(int i = 0; i < grid.length; i++) {
+			for(int j = 0; j < grid[i].length; j++) {
+				grid[i][j].unvisit();
+			}
+		}
+	}
+
 	public int getOccValue(int x, int y) {
 		return grid[transform(x)][transform(y)].getOccValue();
 	}

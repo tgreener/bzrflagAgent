@@ -34,10 +34,16 @@ public class SearchAgent {
 		//search.getUCSPath();
 		//search.getAStarPath();
 		
-		Path p = search.bfs();
-		p.printToFile("bfs.dat", 10);
+
+		Path id = search.iddfs();
+		id.printToFile("iddfs.dat", 45);
+		id.printToVectorFile("iddfsVecs.dat");
+		//Path p = search.bfs();
+		//p.printToVectorFile("bfsVecs.dat");
+		//p.printToFile("bfs.dat", 10);
 		//Path d = search.dfs();
-		//d.printToFile("dfsNodes.dat", 10);
+		//d.printToFile("dfsNodes.dat", 20);
+		//d.printToVectorFile("dfsVecs.dat");
 	}
 	
 	public SearchAgent(AgentClientSocket socket) {
@@ -85,9 +91,16 @@ public class SearchAgent {
 	}
 
 	private Path bfs() {
-		BreadthFirstSearch bfs = new BreadthFirstSearch(searchSpace, "bfsNodes.dat");
+		BreadthFirstSearch bfs = new BreadthFirstSearch(searchSpace, "bfsNodes.dat", 45);
 		
 		return bfs.search(tankStart);
+	}
+
+	private Path iddfs() {
+		IDDFS iddfs = new IDDFS(searchSpace);
+		//iddfs.printNodes(45);
+		
+		return iddfs.search(tankStart);
 	}
 	
 }

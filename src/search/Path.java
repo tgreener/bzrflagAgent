@@ -66,10 +66,10 @@ public class Path {
 		return result;
 	}
 
-	public void printToFile(String fileName, int counter) {
+	public void printToFile(String fileName, int granularity) {
 		try {
 			PrintWriter p = new PrintWriter(fileName, "UTF-8");
-			int pauseCounter = 0;
+			int counter = 0;
 
 			p.println("set title \"" + fileName +"\"");
 			p.println("set xrange [-200.0: 200.0]");
@@ -78,22 +78,22 @@ public class Path {
 			p.println("set size square");		
 
 			for(Step s : path) {
-				p.print("set arrow from ");
-				double dx = s.getEndPoint().getX() - s.getStartPoint().getX();
-				double dy = s.getEndPoint().getY() - s.getStartPoint().getY();
+				if(granularity < counter) {
+					counter = 0;
+					p.print("set arrow from ");
+					double dx = s.getEndPoint().getX() - s.getStartPoint().getX();
+					double dy = s.getEndPoint().getY() - s.getStartPoint().getY();
 
-				p.print(s.getStartPoint().getX() + ", " + s.getStartPoint().getY() + " to ");
-				p.print(s.getEndPoint().getX() + ", " + s.getEndPoint().getY() + " nohead lt 2\n");
+					p.print(s.getStartPoint().getX() + ", " + s.getStartPoint().getY() + " to ");
+					p.print(s.getEndPoint().getX() + ", " + s.getEndPoint().getY() + " nohead lt 2\n");
 
-				p.println("plot \'-\' with lines");
-				p.println("0 0 0 0\ne\n");
+					p.println("plot \'-\' with lines");
+					p.println("0 0 0 0\ne\n");
 
-				if(pauseCounter <= counter) {
-					//p.println("pause 1");
-					pauseCounter = 0;
 				}
-	
-				pauseCounter++;
+				else {
+					counter++;
+				}
 			}
 
 			p.close();
@@ -109,10 +109,9 @@ public class Path {
 	public void printToVectorFile(String fileName) {
 		try {
 			PrintWriter p = new PrintWriter(fileName, "UTF-8");
-				
+			p.println("plot \"-\" with vectors nohead lt 2");
 
 			for(Step s : path) {
-				p.print("set arrow from ");
 				double dx = s.getEndPoint().getX() - s.getStartPoint().getX();
 				double dy = s.getEndPoint().getY() - s.getStartPoint().getY();
 
