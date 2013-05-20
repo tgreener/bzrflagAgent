@@ -44,6 +44,31 @@ public class SearchSpace {
 			}
 		}
 	}
+	
+	public void penalizeObstacles(){
+		for(int i = 0; i < grid[0].length - 1; i++){
+			for(int j = 0; j < grid[0].length - 1; j++){
+				if(grid[i][j].getOccValue() == 1){
+					if(j < grid[0].length)
+						grid[i][j+1].penalize();
+					if(i < grid[0].length && j < grid[0].length)
+						grid[i+1][j+1].penalize();
+					if(i < grid[0].length)
+						grid[i+1][j].penalize();
+					if(i < grid[0].length && j > 0)
+						grid[i+1][j-1].penalize();
+					if(j > 0)
+						grid[i][j-1].penalize();
+					if(i > 0 && j > 0)
+						grid[i-1][j-1].penalize();
+					if(i > 0)
+						grid[i-1][j].penalize();
+					if(i > 0 && j < grid[0].length)
+						grid[i-1][j+1].penalize();
+				}
+			}
+		}
+	}
 
 	public void visit(int x, int y) {
 		grid[transform(x)][transform(y)].visit();
@@ -104,6 +129,14 @@ public class SearchSpace {
 
 	private int transform(int c) {
 		return c + TRANSFORM;
+	}
+	
+	public SearchSpaceLocation untransformedGetLocation(int x, int y) {
+		return grid[x][y];
+	}
+	
+	public boolean untransformedGetLocationIsGoal(int x, int y) {
+		return grid[x][y].isGoal();
 	}
 
 	/*public String toString() {
