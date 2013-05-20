@@ -6,12 +6,120 @@ import state.SearchSpace;
 
 public class IDDFS extends Search {
 	
+	Path best;
+	Path traversing;
+	long depth;
+	boolean goal;
+
 	public IDDFS(SearchSpace space) {
 		super(space);
+		traversing = new Path();
+		best = null;
+		dept = 0;
+		goal = false;
 	}
 
 	@Override
 	public Path search(Point start) {
-		return null;
+		while(!goal) {
+			traverse(start, 0);
+			depth++;
+		}
+		
+		return best;
+	}
+
+	private boolean traverse(Point sp, long d) {
+		if(space.getOccValue(sp.x, sp.y) == 0) {
+			visit(sp);
+
+			if(space.isGoal(sp.x, sp.y) || d > depth) return true;
+			
+			List<Step> steps = expandChildren(sp);
+			Iterator<Step> itr = steps.iterator();
+
+			while(itr.hasNext()) {
+				Step s = itr.next();
+				traversing.addStep(s);
+				if(traverse(s.getEndPoint()), d+1) return true;
+				traversing.popStep();
+			}
+	
+			//leave(sp);
+		}
+		
+		return false;
+	}
+
+	private void visit(Point p) {
+		space.visit(p.x, p.y);
+		if(space.isGoal(p.x, p.y)) {
+			if(best == null || best.getCost() > traversing.getCost()) {
+				best = new Path(traversing);
+			}
+		}
+	}
+
+	private void leave(Point p) {
+		space.unvisit(p.x, p.y);
+	}
+
+	private List<Step> expandChildren(Point parent) {
+		List<Step> children = new LinkedList<Step>();
+		int x = parent.x;
+		int y = parent.y;
+	
+		if(canVisit(x - 1, y)) {
+			children.add(createStep(x, y, x - 1, y));
+		}
+		if(canVisit(x + 1, y)) {
+			children.add(createStep(x, y, x + 1, y));
+		}
+		if(canVisit(x, y + 1)) {
+			children.add(createStep(x, y, x, y + 1));
+		}
+		if(canVisit(x, y - 1)) {
+			children.add(createStep(x, y, x, y - 1));
+		}
+		if(canVisit(x - 1, y + 1)) {
+			children.add(createStep(x, y, x - 1, y + 1));
+		}
+		if(canVisit(x + 1, y + 1)) {
+			children.add(createStep(x, y, x + 1, y + 1));
+		}
+		if(canVisit(x - 1, y - 1)) {
+			children.add(createStep(x, y, x - 1, y - 1));
+		}
+		if(canVisit(x + 1, y - 1)) {
+			children.add(createStep(x, y, x + 1, y - 1));
+		}
+
+		return children;
+	}
+
+	private boolean canVisit(int x, int y) {
+		return space.inBounds(x, y) && !space.visited(x ,y) && (space.getOccValue(x, y) == 0);
+	}
+
+	private Step createStep(int sx, int sy, int ex, int ey) {
+		boolean penalizeStart = space.hasPenalty(sx, sy);
+		boolean penalizeEnd = space.hasPenalty(ex, ey);
+
+		Step step;
+
+		if(penalizeStart && penalizeEnd) {
+			step = new Step(new Point(sx, sy), new Point(ex, ey), 1.5d);
+		}
+		else if(penalizeStart) {
+			step = new Step(new Point(sx, sy), new Point(ex, ey), 1.1d);
+		}
+		else if(penalizeEnd) {
+			step = new Step(new Point(sx, sy), new Point(ex, ey), 1.3d);	
+		}
+		else {
+			step = new Step(new Point(sx, sy), new Point(ex, ey));
+		}
+
+		return step;
 	}
 }
