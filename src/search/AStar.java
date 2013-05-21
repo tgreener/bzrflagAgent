@@ -1,60 +1,84 @@
 package search;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
-import search.UniformCostSearch.NodeCompare;
-import search.UniformCostSearch.TraverseNode;
 import state.SearchSpace;
 import state.SearchSpaceLocation;
 
 public class AStar {
 	
 	private SearchSpace grid;
-	private TraverseNode[][] traverseGrid;
-	private PriorityQueue<TraverseNode> queue;
-	private HashSet<TraverseNode> visitedNodes;
-	private TraverseNode goal;
+	private TraverseNodeA[][] traverseGrid;
+	private PriorityQueue<TraverseNodeA> queue;
+	private HashSet<TraverseNodeA> visitedNodes;
+	private TraverseNodeA goal;
+	private double worldSize;
+	PrintWriter writer;
 	
-	public class NodeCompare implements Comparator<TraverseNode>{
+	public class NodeCompare implements Comparator<TraverseNodeA>{
 
 		@Override
-		public int compare(TraverseNode node1, TraverseNode node2) {
-			return node1.getPathLength() + distanceToGoal(node1)
-					> node2.getPathLength() + distanceToGoal(node2) ? 1 : -1;
+		public int compare(TraverseNodeA node1, TraverseNodeA node2) {
+			double path1 = node1.getPathLength() + node1.distanceToNode(goal);
+			double path2 = node2.getPathLength() + node2.distanceToNode(goal);
+			return path1 < path2 ? -1 : 1;
 		}
 	}
 	
-	public AStar(SearchSpace grid){
+	public AStar(SearchSpace grid, double worldSize){
+		try {
+			writer = new PrintWriter("AStarPath.dat", "UTF-8");
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+		}
+		this.worldSize = worldSize;
 		this.grid = grid;
-		buildTraverseGrid(grid);
-		Comparator<TraverseNode> comparer = new NodeCompare();
-		visitedNodes = new HashSet<TraverseNode>();
-		queue = new PriorityQueue<TraverseNode>(100000,comparer);
+		buildTraverseGrid();
+		Comparator<TraverseNodeA> comparer = new NodeCompare();
+		visitedNodes = new HashSet<TraverseNodeA>();
+		queue = new PriorityQueue<TraverseNodeA>(100000,comparer);
+		
+
 	}
 	
 	public LinkedList<SearchSpaceLocation> getPath(int startX, int startY){
 		LinkedList<SearchSpaceLocation> path = new LinkedList<SearchSpaceLocation>();
-		TraverseNode goal = traverse(startX,startY);
+		TraverseNodeA goal = traverse(startX,startY);
 		path.add(goal.getLocation());
-		TraverseNode current = goal;
-		System.out.println("L:" + goal.getPrev().getPathLength());
-		while(current.prev != null){
+		TraverseNodeA current = goal;
+		while(current.prev != null && current.prev.prev != null){
 			current = current.prev;
-			System.out.println("PATH: X: " + current.getX() + " Y: " + current.getY());
+			writer.println("set arrow from " + current.getX() + ", " + current.getY() + " to " + current.prev.getX() + ", " + current.prev.getY() + " nohead lt -1");
+			writer.println("plot '-' with lines");
+			writer.println("0 0 0 0\ne\n");
 			path.addFirst(current.getLocation());
 		}
+		System.out.println("FP:" + goal.getPathLength());
+		writer.close();
 		return path;
 	}
 	
-	public TraverseNode traverse(int startX, int startY){
-		TraverseNode startNode = traverseGrid[startX][startY];
+	public TraverseNodeA traverse(int startX, int startY){
+		TraverseNodeA startNode = traverseGrid[startX][startY];
 		startNode.setPathLength(0);
 		queue.add(startNode);
+
+		writer.println("set xrange [0:400]\nset yrange [0:400]");
+		writer.println("");
+		int i = 0;
 		while(queue.peek() != null){
-			TraverseNode current = queue.poll();
+			TraverseNodeA current = queue.poll();
+//			writer.println(current.getX() + " " + current.getY());
+			if(current.prev != null && i++ % 50 == 0){
+				writer.println("set arrow from " + current.getX() + ", " + current.getY() + " to " + current.prev.getX() + ", " + current.prev.getY() + " nohead lt 3");
+				writer.println("plot '-' with lines");
+				writer.println("0 0 0 0\ne\n");
+			}
 			if(current.isGoal()){
 				return current;
 			}
@@ -78,27 +102,30 @@ public class AStar {
 			if(nodeX -1 >= 0  && nodeY +1 < traverseGrid.length)
 				offer(traverseGrid[nodeX-1][nodeY+1],current);
 		}
+		System.out.println("fail");
 		return null; //Failed to find the goal
 	}
 	
-	public void offer(TraverseNode node, TraverseNode fromNode){
+	public void offer(TraverseNodeA node, TraverseNodeA fromNode){
+		if(node == null)
+			return;
+
 		if(!queue.contains(node) && !visitedNodes.contains(node)
 				&& node.getLocation().getOccValue() == 0){
 			node.setPrev(fromNode);
 			queue.offer(node);
-		} else if(!queue.contains(node) && node.shouldUpdate(fromNode)
+		} else if(!visitedNodes.contains(node) && node.shouldUpdate(fromNode)
 				&& node.getLocation().getOccValue() == 0){
 			node.setPrev(fromNode);
 		}
 	}
 	
-	private void buildTraverseGrid(SearchSpace searchSpace){
-		traverseGrid = new TraverseNode[200][200];
-		for(int x = 0; x < 200; x++){
-			for(int y = 0; y < 200; y++){
-				traverseGrid[x][y] = new TraverseNode(x,y,grid.getLocation(x, y));
-				if(grid.isGoal(x, y)){
-					System.out.println("GOAL:x:" + x + " Y: " + y);
+	private void buildTraverseGrid(){
+		traverseGrid = new TraverseNodeA[(int)worldSize][(int)worldSize];
+		for(int x = 0; x < (int)worldSize - 1; x++){
+			for(int y = 0; y < (int)worldSize - 1; y++){
+				traverseGrid[x][y] = new TraverseNodeA(x,y,grid.untransformedGetLocation(x,y));
+				if(grid.untransformedGetLocationIsGoal(x, y)){
 					goal = traverseGrid[x][y];
 				}
 			}
@@ -106,15 +133,15 @@ public class AStar {
 	}
 	
 	
-	public class TraverseNode{
+	public class TraverseNodeA{
 		private SearchSpaceLocation location;
-		private TraverseNode prev;
+		private TraverseNodeA prev;
 		private double pathLength;
 		int x,y;
 		
-		public TraverseNode(int x, int y,SearchSpaceLocation node){
+		public TraverseNodeA(int x, int y,SearchSpaceLocation node){
 			this.location = node;
-			this.pathLength = Double.POSITIVE_INFINITY;
+			this.pathLength =0;// Double.POSITIVE_INFINITY;
 			this.x = x;
 			this.y = y;
 		}
@@ -123,7 +150,7 @@ public class AStar {
 			pathLength = length;			
 		}
 
-		public boolean shouldUpdate(TraverseNode fromNode) {
+		public boolean shouldUpdate(TraverseNodeA fromNode) {
 			if(fromNode.pathLength + distanceToNodePenalty(fromNode) < pathLength)
 				return true;
 			return false;
@@ -141,15 +168,15 @@ public class AStar {
 		public boolean isGoal(){
 			return location.isGoal();
 		}
-		public void update(TraverseNode node){
+		public void update(TraverseNodeA node){
 			this.pathLength = node.pathLength;
 			pathLength += distanceToNodePenalty(node);
 			prev = node;
 		}
-		public double distanceToNode(TraverseNode node){
+		public double distanceToNode(TraverseNodeA node){
 			return Math.sqrt(Math.pow(x-node.x,2) + Math.pow(y-node.y, 2));
 		}
-		public double distanceToNodePenalty(TraverseNode node){
+		public double distanceToNodePenalty(TraverseNodeA node){
 			double penalty = 1;
 			if(location.hasPenalty() && node.getLocation().hasPenalty())
 				penalty = 1.5;
@@ -162,16 +189,16 @@ public class AStar {
 		public SearchSpaceLocation getLocation(){
 			return location;
 		}
-		public void setPrev(TraverseNode prev){
+		public void setPrev(TraverseNodeA prev){
 			this.prev = prev;
 			this.update(prev);
 		}
-		public TraverseNode getPrev(){
+		public TraverseNodeA getPrev(){
 			return prev;
 		}
 	}
 
-	public double distanceToGoal(TraverseNode node){
+	public double distanceToGoal(TraverseNodeA node){
 		double d = node.distanceToNode(goal);
 		return d;
 	}
