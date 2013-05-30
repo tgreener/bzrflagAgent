@@ -8,6 +8,10 @@ public class BayesGrid {
 
 	private static final double O_OCCUPIED_GIVEN_OCCUPIED = 0.97d;
 	private static final double O_NOT_OCC_GIVEN_NOT_OCC = 0.9d;
+	private static final double OCCUPIED_LIMIT = 0.999;
+	private static final double EMPTY_LIMIT = 0.001;
+
+	public static enum Occupation {OCCUPIED, EMPTY, UNKNOWN}
 
 	private Semaphore sem;
 	private double[][] stateProbabilityGrid;
@@ -65,5 +69,18 @@ public class BayesGrid {
 			System.out.println(e);
 		}
 		
+	}
+
+	public Occupation isOccupied(int x, int y) {
+		double p = stateProbabilityGrid[x][y];
+		if(p > OCCUPIED_LIMIT) {
+			return Occupation.OCCUPIED;
+		}
+		else if(p < EMPTY_LIMIT) {
+			return Occupation.EMPTY;
+		}
+		else {
+			return Occupation.UNKNOWN;
+		}
 	}
 }
