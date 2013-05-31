@@ -3,8 +3,9 @@ package state;
 
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
-
-import mytools.J;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 
 public class BayesGrid {
 
@@ -87,7 +88,31 @@ public class BayesGrid {
 		}
 	}
 	
-	public double[][] getGrid(){
+	/*public double[][] getGrid(){
 		return stateProbabilityGrid;
+	}*/
+
+	public void writeGNUPlotFile(String filename) {
+		try {
+			PrintWriter p = new PrintWriter(filename, "UTF-8");
+			p.println("plot \"-\" with points");
+			for (int i = 0; i < stateProbabilityGrid.length; i++) {
+				for (int j = 0; j < stateProbabilityGrid[i].length; j++) {
+					if(isOccupied(i, j) == Occupation.OCCUPIED) {
+						p.println(i + " " + j);
+					}
+				}
+			}
+			p.println("e");
+			p.close();
+		}
+		catch(FileNotFoundException e) {
+			System.out.println(e);
+		}
+		catch(UnsupportedEncodingException e) {
+			System.out.println(e);
+		}
 	}
 }
+
+
