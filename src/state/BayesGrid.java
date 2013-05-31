@@ -4,6 +4,8 @@ package state;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
+import mytools.J;
+
 public class BayesGrid {
 
 	private static final double O_OCCUPIED_GIVEN_OCCUPIED = 0.97d;
@@ -18,6 +20,7 @@ public class BayesGrid {
 
 	public BayesGrid(int size, double s) {
 		sem = new Semaphore(1, true);
+		size++;
 		stateProbabilityGrid = new double[size][size];
 
 		for(int i = 0; i < stateProbabilityGrid.length; i++) {
@@ -82,5 +85,9 @@ public class BayesGrid {
 		else {
 			return Occupation.UNKNOWN;
 		}
+	}
+	
+	public double[][] getGrid(){
+		return stateProbabilityGrid;
 	}
 }
