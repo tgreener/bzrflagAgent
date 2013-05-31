@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import mytools.J;
 import agent.net.*;
 
 public class Agent {
@@ -53,7 +55,12 @@ public class Agent {
 		createFields(targetBase);
 	}
 	
+	public Agent(){
+		
+	}
+	
 	public void moveToVector(Vector2d v){
+		J.p("that'n");
 		Tank tank = getTank();
 		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy()).normalize();
 		double angle = tankVector.angle(v);
@@ -103,18 +110,18 @@ public class Agent {
 		List<Obstacle> obstacles = rp.parseObstacles(socket.getResponse());
 		for(Obstacle obstacle : obstacles){
 			double[] center = obstacle.getCenter();
-			Field f = new RepulsiveRadialField(.1,.1,100d,center[0],center[1]);
+			Field f = new RepulsiveRadialField(10,.1,100d,center[0],center[1]);
 			this.fields.add(f);
 			Field f2 = new TangentialRadialField(.1,.1,100d,center[0],center[1]);
 			this.fields.add(f2);
 		}
 		Base base = getTargetBase();
 		double[] center = base.getCenter();
-//		Field f = new AttractiveRadialField(50,base.getRadius(),800d,center[0],center[1]);
-//		this.fields.add(f);
-//		FieldListPrinter flp = new FieldListPrinter(this.fields,800);
-//		flp.printFieldsFile("fieldsOut");
-//		System.exit(0);
+		Field f = new AttractiveRadialField(.3,base.getRadius(),800d,center[0],center[1]);
+		this.fields.add(f);
+		FieldListPrinter flp = new FieldListPrinter(this.fields,800,10);
+		flp.printFieldsFile("fieldsOut");
+		System.exit(0);
 	}
 	public Tank getTank(){
 		socket.sendMyTanksQuery();
