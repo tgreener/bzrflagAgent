@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
+import mytools.J;
+
+
 import state.SearchSpace;
 import state.SearchSpaceLocation;
 
@@ -32,10 +35,10 @@ public class AStar {
 	}
 	
 	public AStar(SearchSpace grid, double worldSize){
-		try {
-			writer = new PrintWriter("AStarPath.dat", "UTF-8");
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-		}
+//		try {
+//			writer = new PrintWriter("AStarPath.dat", "UTF-8");
+//		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+//		}
 		this.worldSize = worldSize;
 		this.grid = grid;
 		buildTraverseGrid();
@@ -46,20 +49,22 @@ public class AStar {
 
 	}
 	
-	public LinkedList<SearchSpaceLocation> getPath(int startX, int startY){
-		LinkedList<SearchSpaceLocation> path = new LinkedList<SearchSpaceLocation>();
+	public LinkedList<TraverseNodeA> getPath(int startX, int startY){
+		LinkedList<TraverseNodeA> path = new LinkedList<TraverseNodeA>();
 		TraverseNodeA goal = traverse(startX,startY);
-		path.add(goal.getLocation());
+		if(goal == null)
+			return null;
+		path.add(goal);
 		TraverseNodeA current = goal;
 		while(current.prev != null && current.prev.prev != null){
 			current = current.prev;
-			writer.println("set arrow from " + current.getX() + ", " + current.getY() + " to " + current.prev.getX() + ", " + current.prev.getY() + " nohead lt -1");
-			writer.println("plot '-' with lines");
-			writer.println("0 0 0 0\ne\n");
-			path.addFirst(current.getLocation());
+//			writer.println("set arrow from " + current.getX() + ", " + current.getY() + " to " + current.prev.getX() + ", " + current.prev.getY() + " nohead lt -1");
+//			writer.println("plot '-' with lines");
+//			writer.println("0 0 0 0\ne\n");
+			path.addFirst(current);
 		}
-		System.out.println("FP:" + goal.getPathLength());
-		writer.close();
+//		System.out.println("FP:" + goal.getPathLength());
+//		writer.close();
 		return path;
 	}
 	
@@ -68,17 +73,17 @@ public class AStar {
 		startNode.setPathLength(0);
 		queue.add(startNode);
 
-		writer.println("set xrange [0:400]\nset yrange [0:400]");
-		writer.println("");
-		int i = 0;
+//		writer.println("set xrange [0:400]\nset yrange [0:400]");
+//		writer.println("");
+//		int i = 0;
 		while(queue.peek() != null){
 			TraverseNodeA current = queue.poll();
 //			writer.println(current.getX() + " " + current.getY());
-			if(current.prev != null && i++ % 50 == 0){
-				writer.println("set arrow from " + current.getX() + ", " + current.getY() + " to " + current.prev.getX() + ", " + current.prev.getY() + " nohead lt 3");
-				writer.println("plot '-' with lines");
-				writer.println("0 0 0 0\ne\n");
-			}
+//			if(current.prev != null && i++ % 50 == 0){
+//				writer.println("set arrow from " + current.getX() + ", " + current.getY() + " to " + current.prev.getX() + ", " + current.prev.getY() + " nohead lt 3");
+//				writer.println("plot '-' with lines");
+//				writer.println("0 0 0 0\ne\n");
+//			}
 			if(current.isGoal()){
 				return current;
 			}
@@ -121,6 +126,7 @@ public class AStar {
 	}
 	
 	private void buildTraverseGrid(){
+		J.p("1");
 		traverseGrid = new TraverseNodeA[(int)worldSize][(int)worldSize];
 		for(int x = 0; x < (int)worldSize - 1; x++){
 			for(int y = 0; y < (int)worldSize - 1; y++){
@@ -201,6 +207,10 @@ public class AStar {
 	public double distanceToGoal(TraverseNodeA node){
 		double d = node.distanceToNode(goal);
 		return d;
+	}
+	
+	public HashSet<TraverseNodeA> getVisitedNodes(){
+		return visitedNodes;
 	}
 
 }
