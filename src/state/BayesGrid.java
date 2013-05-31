@@ -18,15 +18,18 @@ public class BayesGrid {
 
 	private Semaphore sem;
 	private double[][] stateProbabilityGrid;
+	private int size;
 
 	public BayesGrid(int size, double s) {
 		sem = new Semaphore(1, true);
+		this.size = size;
 		size++;
 		stateProbabilityGrid = new double[size][size];
 
 		for(int i = 0; i < stateProbabilityGrid.length; i++) {
 			Arrays.fill(stateProbabilityGrid[i], s);
 		}
+		
 	}
 
 	public double getProbability(int x, int y) {
@@ -95,7 +98,10 @@ public class BayesGrid {
 	public void writeGNUPlotFile(String filename) {
 		try {
 			PrintWriter p = new PrintWriter(filename, "UTF-8");
+			p.println("set xrange [" + 0 + ": " + size + "]");
+			p.println("set yrange [" + 0 + ": " + size + "]");
 			p.println("plot \"-\" with points");
+			
 			for (int i = 0; i < stateProbabilityGrid.length; i++) {
 				for (int j = 0; j < stateProbabilityGrid[i].length; j++) {
 					if(isOccupied(i, j) == Occupation.OCCUPIED) {
