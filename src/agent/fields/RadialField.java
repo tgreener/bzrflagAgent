@@ -29,6 +29,10 @@ public abstract class RadialField extends Field{
 		return spread * alpha;
 	}
 
+	public boolean pointIsInRadius(double x, double y) {
+		return Math.pow(radius, 2) < (Math.pow((y - gy), 2) + Math.pow((x - gx), 2));
+	}
+
 	protected double distanceToGoal(double x, double y) {
 		return (new Vector2d(x - this.gx, y - this.gy)).length();
 	}
