@@ -1,6 +1,7 @@
 
 package state.kalman;
 
+import java.awt.geom.Point2D;
 import org.jblas.DoubleMatrix;
 import static org.jblas.Solve.*;
 
@@ -31,8 +32,8 @@ public class KalmanFilter {
 		H.put(1, (MATRIX_SIZE / 2), 1);
 		HT = H.transpose();
 
-		sigT = DoubleMatrix.diag(new DoubleMatrix(new double[]{100, 0.1, 0.1, 100, 0.1, 0.1}));
-		sigX = DoubleMatrix.diag(new DoubleMatrix(new double[]{0.1, 0.1, 100, 0.1, 0.1, 100}));
+		sigT = DoubleMatrix.diag(new DoubleMatrix(new double[]{10, 0.1, 0.1, 10, 0.1, 0.1}));
+		sigX = DoubleMatrix.diag(new DoubleMatrix(new double[]{0.1, 0.1, 10, 0.1, 0.1, 10}));
 		sigZ = new DoubleMatrix(2, 2);
 		updateSigmaZ(5);
 	}
@@ -69,6 +70,27 @@ public class KalmanFilter {
 
 	public DoubleMatrix getMu() {
 		return mu;
+	}
+
+	public Point2D.Double predict(double dt) {
+		DoubleMatrix predictionMatrix = DoubleMatrix.eye(MATRIX_SIZE);
+		DoubleMatrix H = DoubleMatrix.zeros(2, MATRIX_SIZE);
+		
+		predictionMatrix.put(0, 1, dt);
+		predictionMatrix.put(0, 2, Math.pow(dt, 2) / 2);
+		predictionMatrix.put(1, 2, dt);
+
+		predictionMatrix.put(3, 4, dt);
+		predictionMatrix.put(3, 5, Math.pow(dt, 2) / 2);
+		predictionMatrix.put(4, 5, dt);
+
+		H.put(0, 0, 1);
+		H.put(1, 3, 1);
+
+		DoubleMatrix result = H.mmul(predictionMatrix);
+		result = result.mmul(mu);
+
+		return new Point2D.Double(result.get(0), result.get(1));
 	}
 
 	private void generateGlob() {
