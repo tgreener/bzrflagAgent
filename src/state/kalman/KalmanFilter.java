@@ -2,6 +2,7 @@
 package state.kalman;
 
 import org.jblas.DoubleMatrix;
+import static org.jblas.Solve.*;
 
 public class KalmanFilter {
 	private static final int MATRIX_SIZE = 6;
@@ -105,9 +106,9 @@ public class KalmanFilter {
 		H.mmuli(glob, temp);
 		temp = temp.mmul(HT);
 		temp.addi(sigZ, temp);
+		temp = solve(temp, DoubleMatrix.eye(temp.rows));
 
 		k.mmuli(temp, k);
-		k.addi(-1, k);
 
 		return k;
 	}
