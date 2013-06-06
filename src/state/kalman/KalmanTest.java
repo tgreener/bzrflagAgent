@@ -6,6 +6,9 @@ public class KalmanTest {
 		KalmanFilter kal = new KalmanFilter(0, 0);
 
 		kal.setDelta(5);
-		kal.update(5,5);
+		for(int i = 0; i < 5; i++) {
+			kal.update(5,5);
+			kal.getMu().print();
+		}
 	}
 }
