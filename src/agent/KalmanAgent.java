@@ -3,8 +3,6 @@ package agent;
 import java.util.ArrayList;
 import java.util.List;
 
-import mytools.J;
-
 import agent.fields.AttractiveRadialField;
 import agent.fields.Field;
 import agent.fields.Vector2d;
@@ -41,6 +39,8 @@ public class KalmanAgent {
 		this.rp = rp;
 		this.tankNumber = tankNumber;
 		previousAngle = 0;
+		socket.sendDriveCommand(tankNumber, .0001f);
+		socket.getResponse();
 		while("breakfast" != "waffles"){
 			updateTank();
 		}
@@ -67,7 +67,9 @@ public class KalmanAgent {
 		double myX = tank.getX();
 		double myY = tank.getY();
 		double slope = Math.tan(myAngle);
-		return (myX - x) / (myY - y) == slope;
+		double diff = Math.abs(Math.abs((myY - y) / (myX - x)) - Math.abs(slope));
+
+		return diff < .005;
 	}
 	
 	public void fireShot(){
@@ -75,7 +77,6 @@ public class KalmanAgent {
 		socket.getResponse();
 	}
 	public void updateAngle(){
-		J.p("update angle");
 		Tank tank = getTank();
 		OtherTank ot = getOtherTank();
 		setTarget(ot);
@@ -88,7 +89,6 @@ public class KalmanAgent {
 		double angle = tankVector.angle(targetVector);
 		float angvel = (float) ((angle + angle - previousAngle)/(Math.PI));
 		previousAngle = angle;
-		J.p("ANGLE: " + angle);
 		if(tankVector.crossProduct(targetVector) < 0){
 			angvel = angvel * -1;
 		}
