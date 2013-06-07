@@ -1,7 +1,10 @@
 package agent;
 
+import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.List;
+
+import state.kalman.KalmanFilter;
 
 import agent.fields.AttractiveRadialField;
 import agent.fields.Field;
@@ -20,6 +23,10 @@ public class KalmanAgent {
 	private List<Field> fields;
 	private double previousAngle;
 	private Tank tank;
+	private KalmanFilter kf;
+	private double time;
+	private double resetTime;
+	private int shotSpeed;
 	
 	public static void main(String[] args) {
 		AgentClientSocket sock = new AgentClientSocket(args[0],Integer.parseInt(args[1]));
@@ -34,13 +41,18 @@ public class KalmanAgent {
 	}
 	
 	public KalmanAgent(AgentClientSocket socket, ResponseParser rp, int tankNumber,
-		int shootSpeed, int shotRadius){
+		int shotSpeed, int shotRadius){
 		this.socket = socket;
 		this.rp = rp;
 		this.tankNumber = tankNumber;
+		this.shotSpeed = shotSpeed;
+		Tank tank = getTank();
+		kf = new KalmanFilter(tank.getX(), tank.getY());
 		previousAngle = 0;
 		socket.sendDriveCommand(tankNumber, .0001f);
 		socket.getResponse();
+		time = System.currentTimeMillis();
+		resetTime = 0;
 		while("breakfast" != "waffles"){
 			updateTank();
 		}
@@ -54,10 +66,22 @@ public class KalmanAgent {
 		else{
 			updateAngle();
 		}
+		OtherTank ot = getOtherTank();
+		double t = System.currentTimeMillis();
+		double deltaT = t - time;
+		time = t;
+		if(t - resetTime > 2000){
+			resetTime = t;
+			Double p = kf.predict(0);
+			kf = new KalmanFilter(p.x,p.y);
+		}
+		kf.update(ot.getX(), ot.getY(), deltaT);
+		
 	}
 	public boolean shouldShoot(){
 		OtherTank otherTank = getOtherTank();
-		if(isInLineOfFire(otherTank.getX(), otherTank.getY())){
+		Double p = kf.predict(predictTime(otherTank.getX(), otherTank.getY()));
+		if(isInLineOfFire(p.getX(), p.getY())){
 			return true;
 		}
 		return false;
@@ -68,8 +92,7 @@ public class KalmanAgent {
 		double myY = tank.getY();
 		double slope = Math.tan(myAngle);
 		double diff = Math.abs(Math.abs((myY - y) / (myX - x)) - Math.abs(slope));
-
-		return diff < .005;
+		return diff < .04;
 	}
 	
 	public void fireShot(){
@@ -79,15 +102,22 @@ public class KalmanAgent {
 	public void updateAngle(){
 		Tank tank = getTank();
 		OtherTank ot = getOtherTank();
-		setTarget(ot);
+		double x = ot.getX();
+		double y = ot.getY();
+		Double p = kf.predict(predictTime(x,y) + 8);
+		setTarget(p.getX(),p.getY());
 		moveToVector(tank);
+	}
+	
+	public double predictTime(double otherTankX, double otherTankY){
+		return 2*(Math.sqrt(Math.pow(otherTankX - tank.getX(),2) + Math.pow(otherTankY - tank.getY(),2)))/shotSpeed;
 	}
 	
 	public void moveToVector(Tank tank){
 		Vector2d targetVector = calculateVector(tank);
 		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy()).normalize();
 		double angle = tankVector.angle(targetVector);
-		float angvel = (float) ((angle + angle - previousAngle)/(Math.PI));
+		float angvel = (float) ((7*angle + 3.2*(angle - previousAngle))/(Math.PI));
 		previousAngle = angle;
 		if(tankVector.crossProduct(targetVector) < 0){
 			angvel = angvel * -1;
@@ -99,9 +129,9 @@ public class KalmanAgent {
 
 	}
 	
-	public void setTarget(OtherTank t){
+	public void setTarget(double x, double y){
 		fields = new ArrayList<Field>();
-		Field f = new AttractiveRadialField(1,1,t.getX(),t.getY());
+		Field f = new AttractiveRadialField(1,1,x,y);
 		fields.add(f);
 	}
 	
