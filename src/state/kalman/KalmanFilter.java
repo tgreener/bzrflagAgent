@@ -21,6 +21,15 @@ public class KalmanFilter {
 	private DoubleMatrix glob;
 
 	public KalmanFilter(double x, double y) {
+		DoubleMatrix t = DoubleMatrix.diag(new DoubleMatrix(new double[]{400, 5, 0.1, 400, 5, 0.1}));
+		init(x, y, t);
+	}
+
+	public KalmanFilter(double x, double y, DoubleMatrix t) {
+		init(x, y, t);
+	}
+
+	private void init(double x, double y, DoubleMatrix t) {
 		identity = DoubleMatrix.eye(MATRIX_SIZE);
 		mu = new DoubleMatrix(new double[]{x, 0, 0, y, 0, 0});
 
@@ -32,8 +41,8 @@ public class KalmanFilter {
 		H.put(1, (MATRIX_SIZE / 2), 1);
 		HT = H.transpose();
 
-		sigT = DoubleMatrix.diag(new DoubleMatrix(new double[]{10, 0.1, 0.1, 10, 0.1, 0.1}));
-		sigX = DoubleMatrix.diag(new DoubleMatrix(new double[]{0.1, 0.1, 10, 0.1, 0.1, 10}));
+		sigT = t;
+		sigX = DoubleMatrix.diag(new DoubleMatrix(new double[]{10, 10, 0.1, 10, 10, 0.1}));
 		sigZ = new DoubleMatrix(2, 2);
 		updateSigmaZ(5);
 	}
@@ -41,7 +50,7 @@ public class KalmanFilter {
 	public void updateSigmaZ(double noise) {
 		sigZ.put(0, 0, Math.pow(noise, 2));
 		sigZ.put(1, 1, Math.pow(noise, 2));
-	} 
+	}
 
 	public void setDelta(double dt) {
 		F.put(0, 1, dt);
