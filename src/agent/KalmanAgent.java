@@ -4,6 +4,8 @@ import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.List;
 
+import mytools.J;
+
 import state.kalman.KalmanFilter;
 
 import agent.fields.AttractiveRadialField;
@@ -87,6 +89,7 @@ public class KalmanAgent {
 		return false;
 	}
 	public boolean isInLineOfFire(double x, double y){
+		J.p("target: x: " + x + " y: " + y);
 		double myAngle = tank.getAngle();
 		double myX = tank.getX();
 		double myY = tank.getY();
@@ -110,7 +113,7 @@ public class KalmanAgent {
 	}
 	
 	public double predictTime(double otherTankX, double otherTankY){
-		return 2*(Math.sqrt(Math.pow(otherTankX - tank.getX(),2) + Math.pow(otherTankY - tank.getY(),2)))/shotSpeed;
+		return 700*(Math.sqrt(Math.pow(otherTankX - tank.getX(),2) + Math.pow(otherTankY - tank.getY(),2)))/shotSpeed;
 	}
 	
 	public void moveToVector(Tank tank){
