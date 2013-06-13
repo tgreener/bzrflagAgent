@@ -25,6 +25,11 @@ public class KalmanFilter {
 		init(x, y, t);
 	}
 
+	public KalmanFilter(double x, double y, double[] tDiag) {
+		DoubleMatrix t = DoubleMatrix.diag(new DoubleMatrix(tDiag));
+		init(x, y, t);
+	}
+
 	public KalmanFilter(double x, double y, DoubleMatrix t) {
 		init(x, y, t);
 	}
