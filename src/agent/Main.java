@@ -13,7 +13,7 @@ public class Main {
 		
 		for(int i = 0; i < 9; i++){
 			Agent a = new Agent(i,sock,"red","blue");
-			a.moveToVector(a.calculateVector());
+//			a.moveToVector(a.calculateVector());
 			Timer timer = new Timer();
 			timer.scheduleAtFixedRate(new UpdateVector(a),100,100);
 		}

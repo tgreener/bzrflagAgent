@@ -4,6 +4,8 @@ import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jblas.DoubleMatrix;
+
 import mytools.J;
 
 import state.kalman.KalmanFilter;
@@ -51,7 +53,7 @@ public class KalmanAgent {
 		Tank tank = getTank();
 		kf = new KalmanFilter(tank.getX(), tank.getY());
 		previousAngle = 0;
-		socket.sendDriveCommand(tankNumber, .0001f);
+		socket.sendDriveCommand(tankNumber, 1f);
 		socket.getResponse();
 		time = System.currentTimeMillis();
 		resetTime = 0;
@@ -70,14 +72,15 @@ public class KalmanAgent {
 		}
 		OtherTank ot = getOtherTank();
 		double t = System.currentTimeMillis();
-		double deltaT = t - time;
+		double deltaT = (t - time) / 1000;
 		time = t;
-		if(t - resetTime > 2000){
-			resetTime = t;
-			Double p = kf.predict(0);
-			kf = new KalmanFilter(p.x,p.y);
-		}
 		kf.update(ot.getX(), ot.getY(), deltaT);
+		Double p = kf.predict(0);
+
+		if(t - resetTime > 20000 || p.x > 1000 || p.x < -1000){
+			resetTime = t;
+			kf = new KalmanFilter(p.x,p.y,DoubleMatrix.diag(new DoubleMatrix(new double[]{50, 5, 0.1, 50, 5, 0.1})));
+		}
 		
 	}
 	public boolean shouldShoot(){
@@ -89,13 +92,12 @@ public class KalmanAgent {
 		return false;
 	}
 	public boolean isInLineOfFire(double x, double y){
-		J.p("target: x: " + x + " y: " + y);
 		double myAngle = tank.getAngle();
 		double myX = tank.getX();
 		double myY = tank.getY();
 		double slope = Math.tan(myAngle);
 		double diff = Math.abs(Math.abs((myY - y) / (myX - x)) - Math.abs(slope));
-		return diff < .04;
+		return diff < .01;
 	}
 	
 	public void fireShot(){
@@ -104,16 +106,23 @@ public class KalmanAgent {
 	}
 	public void updateAngle(){
 		Tank tank = getTank();
-		OtherTank ot = getOtherTank();
-		double x = ot.getX();
-		double y = ot.getY();
-		Double p = kf.predict(predictTime(x,y) + 8);
+		DoubleMatrix mu = kf.getMu();
+		Double p = kf.predict(predictTime(mu.get(0),mu.get(3)));
 		setTarget(p.getX(),p.getY());
 		moveToVector(tank);
 	}
 	
 	public double predictTime(double otherTankX, double otherTankY){
-		return 700*(Math.sqrt(Math.pow(otherTankX - tank.getX(),2) + Math.pow(otherTankY - tank.getY(),2)))/shotSpeed;
+		Targeter t = new Targeter();
+		t.setMyPosition(tank.getX(), tank.getY());
+		t.setProjectileSpeed(this.shotSpeed);
+		t.setTargetPosition(otherTankX, otherTankY);
+		DoubleMatrix dm = kf.getMu();
+		t.setTargetVelocity(dm.get(1), dm.get(4));
+		double time = t.getIntersectTime();
+//		dm.print();
+		return time < 0 ? 2 : time*3;
+//		return 700*(Math.sqrt(Math.pow(otherTankX - tank.getX(),2) + Math.pow(otherTankY - tank.getY(),2)))/shotSpeed;
 	}
 	
 	public void moveToVector(Tank tank){

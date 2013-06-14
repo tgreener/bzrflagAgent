@@ -2,6 +2,7 @@ package agent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import mytools.J;
 import agent.fields.AttractiveRadialField;
@@ -12,7 +13,7 @@ import agent.net.Constants;
 import agent.net.ResponseParser;
 import agent.net.Tank;
 
-public class PigeonAgent {
+public class WildPigeonAgent {
 	ResponseParser rp;
 	AgentClientSocket socket;
 	int tankNumber;
@@ -24,30 +25,21 @@ public class PigeonAgent {
 		sock.getResponse();
 		sock.sendIntroduction();
 		ResponseParser rp = new ResponseParser();
-		PigeonAgent pigeon = new PigeonAgent(sock,rp,0);
-		pigeon.beClay();
+		WildPigeonAgent pigeon = new WildPigeonAgent(sock,rp,0);
+		pigeon.beWild();
 	}
 	
-	public PigeonAgent(AgentClientSocket socket, ResponseParser rp, int tankNumber){
+	public WildPigeonAgent(AgentClientSocket socket, ResponseParser rp, int tankNumber){
 		this.socket = socket;
 		this.rp = rp;
-	}
-	
-	public void beClay(){
-		socket.sendDriveCommand(tankNumber, 1);
-		socket.getResponse();
-		Field f = new AttractiveRadialField(.3,1,-50,200);
-		fields = new ArrayList<Field>();
-		fields.add(f);
-		while("poop" != "delicious"){
-			moveToVector();
-		}
 	}
 	
 	public void beWild(){
 		socket.sendDriveCommand(tankNumber, 1);
 		socket.getResponse();
-		socket.sendRotateCommand(tankNumber, 1);
+		while("poop" != "delicious"){
+			moveToVector();
+		}
 	}
 	
 	public Tank getTank(){
@@ -60,24 +52,7 @@ public class PigeonAgent {
 	
 	public void moveToVector(){
 		Tank tank = getTank();
-		if(tank.getY() > 170){
-			Field f = new AttractiveRadialField(.3,1,-30,-200);
-			fields = new ArrayList<Field>();
-			fields.add(f);
-			socket.sendDriveCommand(this.tankNumber, .2f);
-			socket.getResponse();
-		}
-		else if(tank.getY() < -170){
-			Field f = new AttractiveRadialField(.3,1,-30,200);
-			fields = new ArrayList<Field>();
-			fields.add(f);
-			socket.sendDriveCommand(this.tankNumber, .2f);
-			socket.getResponse();
-		}
-		else{
-			socket.sendDriveCommand(this.tankNumber, 1f);
-			socket.getResponse();
-		}
+		setRandomFields();
 		Vector2d targetVector = calculateVector(tank);
 		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy()).normalize();
 		double angle = tankVector.angle(targetVector);
@@ -99,5 +74,15 @@ public class PigeonAgent {
 			vector = vector.add(f.fieldAtPoint(tank.getX(), tank.getY()).normalize());
 		}
 		return vector.normalize();
+	}
+	
+	public void setRandomFields(){
+		Random r = new Random();
+		int max = r.nextInt(5);
+		fields = new ArrayList<Field>();
+		for(int i = 0; i < max; i++){	
+			Field f = new AttractiveRadialField(.3,1, r.nextDouble() * 100 - 100,r.nextDouble() * 100 - 100);
+			fields.add(f);
+		}
 	}
 }

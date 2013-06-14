@@ -1,6 +1,8 @@
 
 package agent;
 
+import mytools.J;
+
 public class Targeter {
 
 	private double[] myPos;

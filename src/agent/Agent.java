@@ -37,7 +37,7 @@ public class Agent {
 		}
 		
 		public void run(){
-			agent.moveToVector(agent.calculateVector());
+//			agent.moveToVector(agent.calculateVector());
 		}
 	}
 	
@@ -60,7 +60,6 @@ public class Agent {
 	}
 	
 	public void moveToVector(Vector2d v){
-		J.p("that'n");
 		Tank tank = getTank();
 		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy()).normalize();
 		double angle = tankVector.angle(v);
