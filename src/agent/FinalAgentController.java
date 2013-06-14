@@ -20,6 +20,7 @@ public class FinalAgentController {
 	List<FinalAgent> agents;
 	List<KalmanFilter> filters;
 	List<Obstacle> obstacles;
+	List<Tank> myTanks;
 	double worldSize;
 	int numTanks;
 	
@@ -54,9 +55,11 @@ public class FinalAgentController {
 			filters.add(kf);
 		}
 		numTanks = myTanks.size();
+		agents = new ArrayList<FinalAgent>();
 		for(Tank tank : myTanks){
-			FinalAgent a = new FinalAgent(socket, obstacles);
+			FinalAgent a = new FinalAssaultAgent(socket, obstacles, filters,consts);
 			a.updateSelf(tank);
+			a.setSpeed(1f);
 			agents.add(a);
 		}
 	}
@@ -72,9 +75,10 @@ public class FinalAgentController {
 	
 	public void updateMyTanks(){
 		socket.sendMyTanksQuery();
-		List<Tank> myTanks = rp.parseMyTanks(socket.getResponse());
+		myTanks = rp.parseMyTanks(socket.getResponse());
 		for(Tank tank : myTanks){
 			FinalAgent a = agents.get(tank.getIndex());
+			a.updateTeam(myTanks);
 			a.updateSelf(tank);
 		}
 	}
