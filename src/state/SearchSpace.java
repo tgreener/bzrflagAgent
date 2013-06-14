@@ -3,7 +3,9 @@ package state;
 
 import state.Occgrid;
 import agent.net.Tank;
+import agent.net.Obstacle;
 import java.awt.Point;
+import java.util.Arrays;
 
 public class SearchSpace {
 
@@ -13,15 +15,76 @@ public class SearchSpace {
 	private boolean penalize;
 	
 	public SearchSpace(Occgrid g, boolean p, int worldSize) {
-		TRANSFORM = worldSize / 2;
-		grid = new SearchSpaceLocation[g.getDimension()[0]][g.getDimension()[1]];
-		penalize = p;
+		init(p, worldSize);
 
 		for(int i = 0; i < grid.length; i++) {
 			for(int j = 0; j < grid[i].length; j++) {
 				grid[i][j] = new SearchSpaceLocation(g.getValueAt(i, j));
 			}			
 		}
+	}
+
+	public SearchSpace(boolean p, int worldSize) {
+		init(p, worldSize);
+
+		for(int i = 0; i < grid.length; i++) {
+			Arrays.fill(grid[i], new SearchSpaceLocation(0));
+		}
+	}
+
+	private void init(boolean p, int worldSize) {
+		TRANSFORM = worldSize / 2;
+		grid = new SearchSpaceLocation[worldSize][worldSize];
+		penalize = p;
+	}
+
+
+	public void addObstacle(Obstacle obstacle) {
+		double[][] corners = obstacle.getCorners();
+		addObstacle(corners);
+	}
+
+	public void addObstacle(double[][] corners) {
+		double[] least = corners[getLeastCornerIndex(corners)];
+		double[] greatest = corners[getGreatestCornerIndex(corners)];
+
+		for(int i = (int)Math.round(least[0]); i <= Math.round(greatest[0]); i++) {
+			for(int j = (int)Math.round(least[1]); j <= Math.round(greatest[1]); j++) {
+				grid[transform(i)][transform(j)].setOccValue(1);
+			}
+		}
+	}
+
+	private static int getLeastCornerIndex(double[][] obCorners) {
+		double smallest = Double.POSITIVE_INFINITY;
+		int index = -1;
+
+		for(int i = 0; i < obCorners.length; i++) {
+			double size = obCorners[i][0] + obCorners[i][1];
+
+			if(size < smallest) {
+				smallest = size;
+				index = i;
+			}
+		}
+		
+		return index;
+	}
+
+	private static int getGreatestCornerIndex(double[][] obCorners) {
+		double biggest = Double.NEGATIVE_INFINITY;
+		int index = -1;
+
+		for(int i = 0; i < obCorners.length; i++) {
+			double size = obCorners[i][0] + obCorners[i][1];
+
+			if(size > biggest) {
+				biggest = size;
+				index = i;
+			}
+		}
+		
+		return index;
 	}
 
 	public void addTank(Tank t) {
@@ -46,6 +109,7 @@ public class SearchSpace {
 	}
 	
 	public void penalizeObstacles(){
+		penalize = true;
 		for(int i = 0; i < grid[0].length - 1; i++){
 			for(int j = 0; j < grid[0].length - 1; j++){
 				if(grid[i][j].getOccValue() == 1){
@@ -137,6 +201,41 @@ public class SearchSpace {
 	
 	public boolean untransformedGetLocationIsGoal(int x, int y) {
 		return grid[x][y].isGoal();
+	}
+
+	public static void testGetCornersIndices() {
+		double[][] obPoly = new double[][] {{-3, -3},{2, -3},{2, 3},{-3, 3}};
+
+		System.out.print("Obstacle corner test");
+		int least = getLeastCornerIndex(obPoly);
+		int greatest = getGreatestCornerIndex(obPoly);
+		printTestResult(least == 0 && greatest == 2);
+
+		System.out.print("Obstacle test");
+		SearchSpace space = new SearchSpace(false, 10);
+		space.addObstacle(obPoly);
+		boolean testPassed = true;
+
+		for(int i = -3; i <= 2; i++) {
+			for(int j = -3; j <= 3; j++) {
+				int occV = space.getOccValue(i, j);
+				System.out.println("i: " + i + ", j: " + j + ", occ: " + occV);
+				if(space.getOccValue(i,j) != 1) {
+					testPassed = false;
+				}
+			}
+		}		
+
+		printTestResult(testPassed); 
+	}
+
+	private static void printTestResult(boolean result) {
+		if(result) {
+			System.out.println("\tPASSED");
+		}
+		else {
+			System.out.println("\tFAILED");
+		}		
 	}
 
 	/*public String toString() {
