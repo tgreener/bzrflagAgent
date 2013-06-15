@@ -21,6 +21,7 @@ public class FinalAgentController {
 	List<KalmanFilter> filters;
 	List<Obstacle> obstacles;
 	List<Tank> myTanks;
+	List<OtherTank> otherTanks;
 	double worldSize;
 	int numTanks;
 	
@@ -56,8 +57,18 @@ public class FinalAgentController {
 		}
 		numTanks = myTanks.size();
 		agents = new ArrayList<FinalAgent>();
+		int agentCount = 0;
 		for(Tank tank : myTanks){
-			FinalAgent a = new FinalAssaultAgent(socket, obstacles, filters,consts);
+			FinalAgent a;
+			if(agentCount < 2){
+				a = new FinalFlagAgent(socket, obstacles, filters,consts);
+			}
+			else{
+				a = new FinalAssaultAgent(socket, obstacles, filters,consts);
+			}
+			agentCount++;
+			a.updateTeam(myTanks);
+			a.updateOtherTeam(otherTanks);
 			a.updateSelf(tank);
 			a.setSpeed(1f);
 			agents.add(a);
@@ -67,9 +78,10 @@ public class FinalAgentController {
 	public void run(){
 		int loopCount = 0;
 		while(true){
-			updateMyTanks();
 			updateOtherTanks();
+			updateMyTanks();
 			loopCount++;
+			J.p("loop: " + loopCount);
 		}
 	}
 	
@@ -79,13 +91,14 @@ public class FinalAgentController {
 		for(Tank tank : myTanks){
 			FinalAgent a = agents.get(tank.getIndex());
 			a.updateTeam(myTanks);
+			a.updateOtherTeam(otherTanks);
 			a.updateSelf(tank);
 		}
 	}
 	
 	public void updateOtherTanks(){
 		socket.sendOtherTanksQuery();
-		List<OtherTank> otherTanks = rp.parseOtherTanks(socket.getResponse());
+		otherTanks = rp.parseOtherTanks(socket.getResponse());
 		int i = 0;
 		for(OtherTank tank : otherTanks){
 			KalmanFilter kf = filters.get(i++);

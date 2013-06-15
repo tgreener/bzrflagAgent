@@ -1,6 +1,5 @@
 package agent;
 
-import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +8,7 @@ import mytools.J;
 import org.jblas.DoubleMatrix;
 
 import state.kalman.KalmanFilter;
+import java.awt.geom.Point2D.Double;
 
 import agent.net.AgentClientSocket;
 import agent.net.Constants;
@@ -27,12 +27,15 @@ public class FinalAgent {
 	protected Constants constants;
 	private double previousAngle;
 	private List<Tank> myTanks;
+	protected List<OtherTank> otherTanks;
+	protected Double target;
 
 	public FinalAgent(AgentClientSocket s, List<Obstacle> os, List<KalmanFilter> filters, Constants c){
 		socket = s;
 		obstacles = os;
 		this.filters = filters;
 		constants = c;
+		target = new Double();
 	}
 	
 	public void updateSelf(Tank tank){
@@ -41,26 +44,27 @@ public class FinalAgent {
 	}
 	
 	public void setTarget(double x, double y){
+		target.x = x;
+		target.y = y;
 		fields = new ArrayList<Field>();
 		Field f = new AttractiveRadialField(1,1,x,y);
 		fields.add(f);
-		resetObstacles();
+//		resetObstacles();
 	}
 	
 	public void resetObstacles(){
 		for(Obstacle ob : obstacles){
 			double[] p = ob.getCenter();
-			Field f = new TangentialRadialField(.1,.1,p[0],p[1]);
+			Field f = new RepulsiveRadialField(.1,.1,100d,p[0],p[1]);
 			fields.add(f);
 		}
-	}	
+	}
 	
 	public void moveToTarget(){
 		Vector2d targetVector = calculateTargetVector();
 		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy()).normalize();
 		double angle = tankVector.angle(targetVector);
-		J.p("AN: " + tank.getVx());
-		float angvel = (float) ((7*angle + 3.2*(angle - previousAngle))/(Math.PI));
+		float angvel = (float) ((2*angle + .3*(angle - previousAngle))/(Math.PI));
 		previousAngle = angle;
 		if(tankVector.crossProduct(targetVector) < 0){
 			angvel = angvel * -1;
@@ -74,9 +78,7 @@ public class FinalAgent {
 	//Calculate vector to current target
 	public Vector2d calculateTargetVector(){
 		Vector2d vector = new Vector2d(0,0);
-		J.p("calc");
 		for(Field f : fields){
-			J.p("F");
 			vector = vector.add(f.fieldAtPoint(tank.getX(), tank.getY()).normalize());
 		}
 		return vector.normalize();
@@ -140,6 +142,9 @@ public class FinalAgent {
 
 	public void updateTeam(List<Tank> myTanks) {
 		this.myTanks = myTanks;		
+	}
+	public void updateOtherTeam(List<OtherTank> otherTanks){
+		this.otherTanks = otherTanks;
 	}
 	
 }

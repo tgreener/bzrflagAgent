@@ -15,12 +15,18 @@ public class FinalBaitAgent extends FinalAgent{
 			List<KalmanFilter> filters, Constants c) {
 		super(s, os, filters, c);
 		setTarget(0,0);
-		setSpeed(1f);
 	}
 	
 	public void updateSelf(Tank tank){
 		this.tank = tank;
+		if(tank.getX() < 50 && tank.getVx() > .1){
+			setSpeed(0);
+		}
 		moveToTarget();
+	}
+	
+	public void resetObstacles(){
+		//honey badger don't care bout no obstacles
 	}
 
 }
