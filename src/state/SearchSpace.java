@@ -13,6 +13,7 @@ public class SearchSpace {
 
 	private SearchSpaceLocation[][] grid;
 	private boolean penalize;
+	private int worldSize;
 	
 	public SearchSpace(Occgrid g, boolean p, int worldSize) {
 		init(p, worldSize);
@@ -32,7 +33,18 @@ public class SearchSpace {
 		}
 	}
 
+	public SearchSpace(boolean p, SearchSpace other) {
+		init(p, other.getWorldSize());
+
+		for(int i = -TRANSFORM; i < TRANSFORM; i++) {
+			for(int j = -TRANSFORM; j < TRANSFORM; j++) {
+				grid[transform(i)][transform(j)] = new SearchSpaceLocation(other.getLocation(i, j));
+			}
+		}
+	}
+
 	private void init(boolean p, int worldSize) {
+		this.worldSize = worldSize;
 		TRANSFORM = worldSize / 2;
 		grid = new SearchSpaceLocation[worldSize][worldSize];
 		penalize = p;
@@ -154,6 +166,10 @@ public class SearchSpace {
 		}
 	}
 
+	public int getWorldSize() {
+		return worldSize;
+	}
+
 	public int getOccValue(int x, int y) {
 		return grid[transform(x)][transform(y)].getOccValue();
 	}
@@ -179,8 +195,8 @@ public class SearchSpace {
 	}
 
 	public boolean inBounds(int x, int y) {
-		return x > -200 && x < 200 &&
-		       y > -200 && y < 200;
+		return x > -TRANSFORM && x < TRANSFORM &&
+		       y > -TRANSFORM && y < TRANSFORM;
 	}
 
 	public boolean inBounds(Point p) {
@@ -219,14 +235,24 @@ public class SearchSpace {
 		for(int i = -3; i <= 2; i++) {
 			for(int j = -3; j <= 3; j++) {
 				int occV = space.getOccValue(i, j);
-				System.out.println("i: " + i + ", j: " + j + ", occ: " + occV);
-				if(space.getOccValue(i,j) != 1) {
+				if(occV != 1) {
 					testPassed = false;
 				}
 			}
 		}		
 
 		printTestResult(testPassed); 
+
+		System.out.print("Copy constructor test");
+		testPassed = true;
+
+		SearchSpace space2 = new SearchSpace(false, space);
+
+		testPassed = space2.getWorldSize() == space.getWorldSize() &&
+			     space2.getOccValue(0, 0) == space.getOccValue(0, 0);
+
+		printTestResult(testPassed);
+		
 	}
 
 	private static void printTestResult(boolean result) {

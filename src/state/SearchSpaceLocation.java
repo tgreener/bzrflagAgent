@@ -25,6 +25,14 @@ public class SearchSpaceLocation {
 		visited = false;
 	}
 
+	public SearchSpaceLocation(SearchSpaceLocation other) {
+		occValue = other.getOccValue();
+		isGoal = other.isGoal();
+		hasTank = other.hasTank();
+		hasPenalty = other.hasPenalty();
+		visited = other.visited();
+	}
+
 	public SearchSpaceLocation() {
 		int occValue = 1;
 		isGoal = false;
