@@ -22,8 +22,10 @@ public class FinalAgentController {
 	List<Obstacle> obstacles;
 	List<Tank> myTanks;
 	List<OtherTank> otherTanks;
+	Constants consts;
 	double worldSize;
 	int numTanks;
+	boolean otherTeamIsDead;
 	
 	public static void main(String[] args) {
 		AgentClientSocket sock = new AgentClientSocket(args[0],Integer.parseInt(args[1]));
@@ -39,10 +41,11 @@ public class FinalAgentController {
 	public FinalAgentController(AgentClientSocket socket, ResponseParser rp){
 		this.socket = socket;
 		this.rp = rp;
+		otherTeamIsDead = false;
 	}
 	
 	public void init(){
-		Constants consts = rp.parseConstants(socket.getResponse());
+		consts = rp.parseConstants(socket.getResponse());
 		worldSize = consts.getWorldsize();
 		socket.sendMyTanksQuery();
 		List<Tank> myTanks = rp.parseMyTanks(socket.getResponse());
@@ -101,8 +104,51 @@ public class FinalAgentController {
 		otherTanks = rp.parseOtherTanks(socket.getResponse());
 		int i = 0;
 		for(OtherTank tank : otherTanks){
-			KalmanFilter kf = filters.get(i++);
-			kf.update(tank.getX(), tank.getY());
+			if(tank.getStatus().equals("alive")){
+				KalmanFilter kf = filters.get(i++);
+				kf.update(tank.getX(), tank.getY());
+			}
+		}
+		if(i == 0 && !otherTeamIsDead){
+			otherTeamIsDead = true;
+			List<FinalAgent> newAgents = new ArrayList<FinalAgent>();
+			for(FinalAgent a : agents){
+				a = new FinalFlagAgent(socket, obstacles, filters,consts);
+				newAgents.add(a);
+			}
+			agents = newAgents;
+		}
+	}
+	
+	public void tournamentInit(){
+		consts = rp.parseConstants(socket.getResponse());
+		worldSize = consts.getWorldsize();
+		socket.sendMyTanksQuery();
+		List<Tank> myTanks = rp.parseMyTanks(socket.getResponse());
+		socket.sendOtherTanksQuery();
+		List<OtherTank> otherTanks = rp.parseOtherTanks(socket.getResponse());
+		socket.sendObstaclesQuery();
+		List<Obstacle> obstacles = rp.parseObstacles(socket.getResponse());
+		filters = new ArrayList<KalmanFilter>();
+		for(OtherTank tank : otherTanks){
+			KalmanFilter kf = new KalmanFilter(tank.getX(),tank.getY());
+			filters.add(kf);
+		}
+		numTanks = myTanks.size();
+		agents = new ArrayList<FinalAgent>();
+		int agentCount = 0;
+		for(Tank tank : myTanks){
+			FinalAgent a;
+			if(agentCount++ == 0){
+				a = new FinalFlagAgent(socket, obstacles, filters,consts);
+			}
+			else
+				a = new FinalAssaultAgent(socket, obstacles, filters,consts);
+			a.updateTeam(myTanks);
+			a.updateOtherTeam(otherTanks);
+			a.updateSelf(tank);
+			a.setSpeed(1f);
+			agents.add(a);
 		}
 	}
 }
