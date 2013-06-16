@@ -55,7 +55,8 @@ public class Path {
 	}
 	
 	public String toString() {
-		String result = "Path Cost: " + pathCost;
+		String result = "Path Cost: " + pathCost + "\n";
+		result += "Path Steps: " + path.size();
 		Iterator<Step> i = iterator();
 		
 		while(i.hasNext()) {
