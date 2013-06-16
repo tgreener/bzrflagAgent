@@ -29,7 +29,9 @@ public class SearchSpace {
 		init(p, worldSize);
 
 		for(int i = 0; i < grid.length; i++) {
-			Arrays.fill(grid[i], new SearchSpaceLocation(0));
+			for(int j = 0; j < grid[i].length; j++) {
+				grid[i][j] = new SearchSpaceLocation(0);
+			}			
 		}
 	}
 
@@ -264,9 +266,16 @@ public class SearchSpace {
 		}		
 	}
 
-	/*public String toString() {
-		String result;
+	public String toString() {
+		String result = new String();
+		
+		for(int j = worldSize - 1; j >= 0; j--) {
+			for(int i = 0; i < worldSize; i++) {
+				result += grid[i][j].getOccValue() + " ";
+			}
+			result += "\n";
+		}
 
 		return result;
-	}*/
+	}
 }

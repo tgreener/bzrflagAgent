@@ -14,6 +14,8 @@ public class BreadthFirstSearch extends Search {
 	
 	Path best;
 	LinkedList<Node> frontier;
+
+	boolean print;
 	PrintWriter p;
 	int granularity;
 	int counter;
@@ -36,16 +38,24 @@ public class BreadthFirstSearch extends Search {
 		p.println("set xrange [-200.0: 200.0]");
 		p.println("set yrange [-200.0: 200.0]");
 		p.println("unset key");
-		p.println("set size square");	
+		p.println("set size square");
 
 		granularity = g;
 		counter = 0;
+		print = true;
+	}
+
+	public BreadthFirstSearch(SearchSpace space) {
+		super(space);
+		best = null;
+		frontier = new LinkedList<Node>();
+		print = false;
 	}
 
 	@Override
 	public Path search(Point start) {
 		traverse(start);
-		p.close();
+		if(print) p.close();
 			
 		return best;
 	}
@@ -57,11 +67,12 @@ public class BreadthFirstSearch extends Search {
 
 			while(frontier.size() > 0) {
 				Node n = frontier.pop();
-				printNodeToFile(n);
+				if(print) printNodeToFile(n);
 				
 				Point position = n.step.getEndPoint();
-				if(space.isGoal(position.x, position.y))
+				if(space.isGoal(position.x, position.y)) {
 					generatePath(n);
+				}
 
 				List<Step> edges = expandChildren(position);
 				Iterator<Step> itr = edges.iterator();
@@ -131,6 +142,10 @@ public class BreadthFirstSearch extends Search {
 		return children;
 	}
 
+	private boolean canVisit(int x, int y) {
+		return space.inBounds(x, y) && !space.visited(x ,y) && space.getOccValue(x, y) == 0;
+	}
+
 	private void printNodeToFile(Node n) {
 		if(granularity < counter) {
 			counter = 0;		
@@ -147,10 +162,6 @@ public class BreadthFirstSearch extends Search {
 		else {
 			counter++;
 		}
-	}
-
-	private boolean canVisit(int x, int y) {
-		return space.inBounds(x, y) && !space.visited(x ,y) && space.getOccValue(x, y) == 0;
 	}
 
 	private Step createStep(int sx, int sy, int ex, int ey) {
