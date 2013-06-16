@@ -1,6 +1,7 @@
 
 package agent;
 
+import java.util.List;
 import agent.net.Obstacle;
 import search.AStar;
 import state.SearchSpace;
@@ -14,7 +15,7 @@ public class SearchingTank {
 	private boolean followPath;
 	private List<TraverseNodeA> path;
 
-	public class SearchingTank(AgentClientSocket s, List<Obstacle> os, List<KalmanFilter> filters, Constants c, int worldSize) {
+	public SearchingTank(AgentClientSocket s, List<Obstacle> os, List<KalmanFilter> filters, Constants c, int worldSize) {
 		this.super(s, os, filters, c);
 
 		space = new SearchSpace(true, worldSize);
@@ -28,7 +29,12 @@ public class SearchingTank {
 	
 	@override
 	public void updateSelf(Tank tank) {
-		super.updateSelf(tank);
+		if(followPath) {
+			
+		}
+		else {
+			super.updateSelf(tank);
+		}
 	}
 
 	public void search() {
