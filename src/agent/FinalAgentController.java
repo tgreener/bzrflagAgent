@@ -26,6 +26,7 @@ public class FinalAgentController {
 	double worldSize;
 	int numTanks;
 	boolean otherTeamIsDead;
+	long startTime;
 	
 	public static void main(String[] args) {
 		AgentClientSocket sock = new AgentClientSocket(args[0],Integer.parseInt(args[1]));
@@ -34,7 +35,7 @@ public class FinalAgentController {
 		sock.sendConstantsQuery();
 		ResponseParser rp = new ResponseParser();
 		FinalAgentController controller = new FinalAgentController(sock,rp);
-		controller.init();
+		controller.tournamentInit();
 		controller.run();
 	}
 	
@@ -48,11 +49,11 @@ public class FinalAgentController {
 		consts = rp.parseConstants(socket.getResponse());
 		worldSize = consts.getWorldsize();
 		socket.sendMyTanksQuery();
-		List<Tank> myTanks = rp.parseMyTanks(socket.getResponse());
+		myTanks = rp.parseMyTanks(socket.getResponse());
 		socket.sendOtherTanksQuery();
-		List<OtherTank> otherTanks = rp.parseOtherTanks(socket.getResponse());
+		otherTanks = rp.parseOtherTanks(socket.getResponse());
 		socket.sendObstaclesQuery();
-		List<Obstacle> obstacles = rp.parseObstacles(socket.getResponse());
+		obstacles = rp.parseObstacles(socket.getResponse());
 		filters = new ArrayList<KalmanFilter>();
 		for(OtherTank tank : otherTanks){
 			KalmanFilter kf = new KalmanFilter(tank.getX(),tank.getY());
@@ -84,7 +85,6 @@ public class FinalAgentController {
 			updateOtherTanks();
 			updateMyTanks();
 			loopCount++;
-			J.p("loop: " + loopCount);
 		}
 	}
 	
@@ -93,6 +93,7 @@ public class FinalAgentController {
 		myTanks = rp.parseMyTanks(socket.getResponse());
 		for(Tank tank : myTanks){
 			FinalAgent a = agents.get(tank.getIndex());
+			a.setTime(System.currentTimeMillis() - startTime);
 			a.updateTeam(myTanks);
 			a.updateOtherTeam(otherTanks);
 			a.updateSelf(tank);
@@ -121,14 +122,16 @@ public class FinalAgentController {
 	}
 	
 	public void tournamentInit(){
+		startTime = System.currentTimeMillis();
 		consts = rp.parseConstants(socket.getResponse());
 		worldSize = consts.getWorldsize();
 		socket.sendMyTanksQuery();
-		List<Tank> myTanks = rp.parseMyTanks(socket.getResponse());
+		myTanks = rp.parseMyTanks(socket.getResponse());
 		socket.sendOtherTanksQuery();
-		List<OtherTank> otherTanks = rp.parseOtherTanks(socket.getResponse());
+		otherTanks = rp.parseOtherTanks(socket.getResponse());
 		socket.sendObstaclesQuery();
-		List<Obstacle> obstacles = rp.parseObstacles(socket.getResponse());
+		obstacles = rp.parseObstacles(socket.getResponse());
+		J.p("OBS: " + obstacles.size());
 		filters = new ArrayList<KalmanFilter>();
 		for(OtherTank tank : otherTanks){
 			KalmanFilter kf = new KalmanFilter(tank.getX(),tank.getY());
@@ -139,13 +142,15 @@ public class FinalAgentController {
 		int agentCount = 0;
 		for(Tank tank : myTanks){
 			FinalAgent a;
-			if(agentCount++ == 0){
+			if(agentCount++ == 0 || obstacles.size() > 40){
 				a = new FinalFlagAgent(socket, obstacles, filters,consts);
 			}
-			else
+			else{
 				a = new FinalAssaultAgent(socket, obstacles, filters,consts);
+			}
 			a.updateTeam(myTanks);
 			a.updateOtherTeam(otherTanks);
+			a.setTime(System.currentTimeMillis() - startTime);
 			a.updateSelf(tank);
 			a.setSpeed(1f);
 			agents.add(a);

@@ -36,7 +36,7 @@ public class PigeonAgent {
 	public void beClay(){
 		socket.sendDriveCommand(tankNumber, 1);
 		socket.getResponse();
-		Field f = new AttractiveRadialField(.3,1,-50,200);
+		Field f = new AttractiveRadialField(.3,1,0,200);
 		fields = new ArrayList<Field>();
 		fields.add(f);
 		while("poop" != "delicious"){
@@ -61,14 +61,14 @@ public class PigeonAgent {
 	public void moveToVector(){
 		Tank tank = getTank();
 		if(tank.getY() > 170){
-			Field f = new AttractiveRadialField(.3,1,-30,-200);
+			Field f = new AttractiveRadialField(.3,1,30,-180);
 			fields = new ArrayList<Field>();
 			fields.add(f);
 			socket.sendDriveCommand(this.tankNumber, .2f);
 			socket.getResponse();
 		}
 		else if(tank.getY() < -170){
-			Field f = new AttractiveRadialField(.3,1,-30,200);
+			Field f = new AttractiveRadialField(.3,1,30,180);
 			fields = new ArrayList<Field>();
 			fields.add(f);
 			socket.sendDriveCommand(this.tankNumber, .2f);

@@ -53,7 +53,7 @@ public class KalmanAgent {
 		Tank tank = getTank();
 		kf = new KalmanFilter(tank.getX(), tank.getY());
 		previousAngle = 0;
-		socket.sendDriveCommand(tankNumber, 1f);
+		socket.sendDriveCommand(tankNumber, .0001f);
 		socket.getResponse();
 		time = System.currentTimeMillis();
 		resetTime = 0;
@@ -97,7 +97,7 @@ public class KalmanAgent {
 		double myY = tank.getY();
 		double slope = Math.tan(myAngle);
 		double diff = Math.abs(Math.abs((myY - y) / (myX - x)) - Math.abs(slope));
-		return diff < .01;
+		return diff < .02;
 	}
 	
 	public void fireShot(){

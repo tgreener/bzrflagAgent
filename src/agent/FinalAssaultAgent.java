@@ -42,9 +42,9 @@ public class FinalAssaultAgent extends FinalAgent {
 		Double p = kf.predict(predictTime(mu.get(0),mu.get(3),kf));
 		setTarget(p.getX(),p.getY());
 		moveToTarget();
-//		if(!isFriendlyFire()){
+		if(!isFriendlyFire()){
 			fireShot();
-//		}
+		}
 	}
 	
 	public double getDistanceTo(OtherTank t){

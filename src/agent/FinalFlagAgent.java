@@ -47,8 +47,10 @@ public class FinalFlagAgent extends FinalAgent{
 			double[] center = base.getCenter();
 			setTarget(center[0],center[1]);
 		}
-		Field rf = new RepulsiveRadialField(1,10,300d,0,0);
-		fields.add(rf);
+		if(obstacles.size() < 40){
+			Field rf = new RepulsiveRadialField(1,10,300d,0,0);
+			fields.add(rf);
+		}
 		moveToTarget();
 	}
 

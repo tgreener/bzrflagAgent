@@ -29,6 +29,11 @@ public class FinalAgent {
 	private List<Tank> myTanks;
 	protected List<OtherTank> otherTanks;
 	protected Double target;
+	protected long time;
+	protected double x;
+	protected double y;
+	protected int stuckCounter;
+	protected List<Field> learnedBadSpots;
 
 	public FinalAgent(AgentClientSocket s, List<Obstacle> os, List<KalmanFilter> filters, Constants c){
 		socket = s;
@@ -36,6 +41,14 @@ public class FinalAgent {
 		this.filters = filters;
 		constants = c;
 		target = new Double();
+		stuckCounter = 0;
+		x = 0;
+		y = 0;
+		learnedBadSpots = new ArrayList<Field>();
+	}
+	
+	public void setTime(long t){
+		time = t;
 	}
 	
 	public void updateSelf(Tank tank){
@@ -55,7 +68,11 @@ public class FinalAgent {
 	public void resetObstacles(){
 		for(Obstacle ob : obstacles){
 			double[] p = ob.getCenter();
-			Field f = new RepulsiveRadialField(.1,.1,100d,p[0],p[1]);
+			Field f = new RepulsiveRadialField(.1,.01,30d,p[0],p[1]);
+			fields.add(f);
+		}
+		for(Field f : learnedBadSpots){
+			J.p("learned");
 			fields.add(f);
 		}
 	}
@@ -65,6 +82,22 @@ public class FinalAgent {
 		Vector2d tankVector = new Vector2d(tank.getVx(),tank.getVy()).normalize();
 		double angle = tankVector.angle(targetVector);
 		float angvel = (float) ((2*angle + .3*(angle - previousAngle))/(Math.PI));
+		if(Math.abs(x - tank.getX()) < 5 && Math.abs(y - tank.getY()) < 5){
+			stuckCounter++;
+		}
+		else if(stuckCounter > 0){
+			stuckCounter--;
+		}
+		x = tank.getX();
+		y = tank.getY();
+		if(stuckCounter > 5){
+			Field f = new RepulsiveRadialField(10,10,100d,tank.getX(),tank.getY());
+			fields.add(f);
+		}
+		if(stuckCounter > 20){
+			angvel = 1;
+		}
+		J.p("stuck: " + stuckCounter);
 		previousAngle = angle;
 		if(tankVector.crossProduct(targetVector) < 0){
 			angvel = angvel * -1;
@@ -90,6 +123,7 @@ public class FinalAgent {
 		if(isFriendlyFire()){
 			return false;
 		}
+		J.p("fired");
 		KalmanFilter kf = filters.get(tank.getIndex());
 		DoubleMatrix mu = kf.getMu();
 		Double p = kf.predict(predictTime(mu.get(0), mu.get(3), kf));
@@ -100,10 +134,21 @@ public class FinalAgent {
 	}
 	
 	public boolean isFriendlyFire(){
+		if(time < 7000){
+			return true;
+		}
 		for(Tank t : myTanks){
-			if(isInLineOfFire(t.getX(),t.getY())){
-				return true;
+			if(t == tank){
+				continue;
 			}
+			double myAngle = tank.getAngle();
+			double myX = tank.getX();
+			double myY = tank.getY();
+			double slope = Math.tan(myAngle);
+			double diff = Math.abs(Math.abs((myY - y) / (myX - x)) - Math.abs(slope));
+			if(diff < 40)
+				return true;
+			
 		}
 		return false;
 	}
